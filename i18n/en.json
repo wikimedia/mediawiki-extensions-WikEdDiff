@@ -1,0 +1,16 @@
+{
+    "@metadata": {
+        "authors": [
+            "Cacycle"
+        ]
+    },
+    "wiked-diff-empty": "(No difference)",
+    "wiked-diff-same": "=",
+    "wiked-diff-ins": "+",
+    "wiked-diff-del": "-",
+    "wiked-diff-block-left": "◀",
+    "wiked-diff-block-right": "▶",
+    "wiked-diff-block-left-nounicode": "<",
+    "wiked-diff-block-right-nounicode": ">",
+    "wiked-diff-error": "Error: diff not consistent with versions!"
+}
