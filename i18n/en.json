@@ -4,6 +4,7 @@
             "Cacycle"
         ]
     },
+    "wiked-diff-desc": "Inline-style difference engine with block move support",
     "wiked-diff-empty": "(No difference)",
     "wiked-diff-same": "=",
     "wiked-diff-ins": "+",

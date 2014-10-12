@@ -4,6 +4,7 @@
             "Cacycle"
         ]
     },
+    "wiked-diff-desc": "{{desc|name=wikEdDiff|url=https://www.mediawiki.org/wiki/Extension:WikEdDiff}}",
     "wiked-diff-empty": "This message appears instead of a \"diff\" when comparing two revisions that are identical.",
     "wiked-diff-same": "This text or symbol is the title attribute (popup) for the \"wiked-diff-empty\" message.",
     "wiked-diff-ins": "This text or symbol is the title attribute (popup) for insertion blocks.",

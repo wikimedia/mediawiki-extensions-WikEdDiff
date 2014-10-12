@@ -30,9 +30,9 @@ global $wgExtensionCredits, $wgResourceModules, $wgHooks;
 $wgExtensionCredits['other'][] = array(
 	'path' => __FILE__,
 	'name' => 'wikEdDiff',
-	'author' => 'Cacycle', 
-	'url' => 'https://www.mediawiki.org/wiki/Extension:wikEdDiff', 
-	'description' => 'Inline-style difference engine with block move support',
+	'author' => 'Cacycle',
+	'url' => 'https://www.mediawiki.org/wiki/Extension:wikEdDiff',
+	'descriptionmsg' => 'wiked-diff-desc',
 	'version'  => '1.2.0',
 	'license-name' => 'GPL-2.0+' // GNU General Public License v2.0 or later
 );
