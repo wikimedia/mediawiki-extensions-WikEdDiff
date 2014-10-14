@@ -33,7 +33,7 @@ $wgExtensionCredits['other'][] = array(
 	'author' => 'Cacycle',
 	'url' => 'https://www.mediawiki.org/wiki/Extension:wikEdDiff',
 	'descriptionmsg' => 'wiked-diff-desc',
-	'version'  => '1.2.0',
+	'version' => '1.2.1',
 	'license-name' => 'GPL-2.0+' // GNU General Public License v2.0 or later
 );
 
@@ -49,4 +49,4 @@ $wgResourceModules['ext.wikEdDiff'] = array(
 $wgMessagesDirs['WikEdDiff'] = $dir . 'i18n';
 $wgExtensionMessagesFiles['WikEdDiff'] =  $dir . 'WikEdDiff.i18n.php';
 $wgAutoloadClasses['WikEdDiff'] = $dir . 'WikEdDiff.body.php';
-$wgHooks['CustomDifferenceEngine'][] = 'WikEdDiff::onCustomDifferenceEngine';
+$wgHooks['GenerateTextDiffBody'][] = 'WikEdDiff::onGenerateTextDiffBody';

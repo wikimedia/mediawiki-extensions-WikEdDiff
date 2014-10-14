@@ -1,20 +1,20 @@
 <?php
 /**
- * @version 1.2.0
- * @date October 09, 2014
+ * @version 1.2.1
+ * @date October 14, 2014
  *
  * wikEdDiff: inline-style difference engine with block move support
  *
- * WikEdDiff.php and the JavaScript library wikEd diff are synced one-to-one ports. Changes and
- * fixes are to be applied to both versions.
+ * WikEdDiff.php and the JavaScript library wikEd diff are synced one-to-one ports.
+ * Changes and fixes are to be applied to both versions.
  *
  * JavaScript library (mirror): https://en.wikipedia.org/wiki/User:Cacycle/diff
  * JavaScript online tool: http://cacycle.altervista.org/wikEd-diff-tool.html
  * MediaWiki extension: https://www.mediawiki.org/wiki/Extension:wikEdDiff
  *
- * This difference engine applies a word-based algorithm that uses unique words as anchor points to
- * identify matching text and moved blocks (Paul Heckel: A technique for isolating differences
- * between files. Communications of the ACM 21(4):264 (1978)).
+ * This difference engine applies a word-based algorithm that uses unique words as anchor
+ * points to identify matching text and moved blocks (Paul Heckel: A technique for isolating
+ * differences between files. Communications of the ACM 21(4):264 (1978)).
  *
  * Additional features:
  *
@@ -35,10 +35,10 @@
  * Datastructures (abbreviations from publication):
  *
  * class WikEdDiffText:  diff text object (new or old version)
- * -> text                 text
- * -> $words[]             word count table
- * -> $first               index of first token in tokens list
- * -> $last                index of last token in tokens list
+ * -> text                 text of version
+ * -> words[]              word count table
+ * -> first                index of first token in tokens list
+ * -> last                 index of last token in tokens list
  *
  * -> tokens[]:          token list for new or old string (doubly-linked list) (N and O)
  *   => prev               previous list item
@@ -50,65 +50,66 @@
  *
  * class WikEdDiff:      diff object
  * -> config[]:            configuration settings, see top of code for customization options
- *    => regExp              all regular expressions
+ *    => regExp[]:           all regular expressions
  *        => split             regular expressions used for splitting text into tokens
  *    => htmlCode            HTML code fragments used for creating the output
  * -> newText              new text
  * -> oldText              old text
  * -> html                 diff html
- * -> error                  flag: result has not passed unit tests
+ * -> error                flag: result has not passed unit tests
+ * -> bordersDown[]        linked region borders downwards, [new index, old index]
+ * -> bordersUp[]          linked region borders upwards, [new index, old index]
+ * -> symbols:             symbols table for whole text at all refinement levels
+ *   => token[]              hash table of parsed tokens for passes 1 - 3, points to symbol[i]
+ *   => symbol[]:            array of objects that hold token counters and pointers:
+ *     => newCount             new text token counter (NC)
+ *     => oldCount             old text token counter (OC)
+ *     => newToken             token index in text.newText.tokens
+ *     => oldToken             token index in text.oldText.tokens
+ *   => linked               flag: at least one unique token pair has been linked
  *
- * $symbols:             object for symbols table data
- * => token[]              hash table of parsed tokens for passes 1 - 3, points to symbol[i]
- * => symbol[]:            array of objects that hold token counters and pointers:
- *   => newCount             new text token counter (NC)
- *   => oldCount             old text token counter (OC)
- *   => newToken             token index in text.newText.tokens
- *   => oldToken             token index in text.oldText.tokens
- * => linked               flag: at least one unique token pair has been linked
+ * -> blocks[]:            array, block data (consecutive text tokens) in new text order
+ *   => oldBlock             number of block in old text order
+ *   => newBlock             number of block in new text order
+ *   => oldNumber            old text token number of first token
+ *   => newNumber            new text token number of first token
+ *   => oldStart             old text token index of first token
+ *   => count                number of tokens
+ *   => unique               contains unique linked token
+ *   => words                word count
+ *   => chars                char length
+ *   => type                 '=', '-', '+', '|' (same, deletion, insertion, mark)
+ *   => section              section number
+ *   => group                group number of block
+ *   => fixed                belongs to a fixed (not moved) group
+ *   => moved                moved block group number corresponding with mark block
+ *   => text                 text of block tokens
  *
- * -> blocks[]:          array, block data (consecutive text tokens) in new text order
- *   => oldBlock           number of block in old text order
- *   => newBlock           number of block in new text order
- *   => oldNumber          old text token number of first token
- *   => newNumber          new text token number of first token
- *   => oldStart           old text token index of first token
- *   => count              number of tokens
- *   => unique             contains unique matched token
- *   => words              word count
- *   => chars              char length
- *   => type               '=', '-', '+', '|' (same, deletion, insertion, mark)
- *   => section            section number
- *   => group              group number of block
- *   => fixed              belongs to a fixed (not moved) group
- *   => moved              moved block group number corresponding with mark block
- *   => text               text of block tokens
- *
- * -> sections[]:        array, block sections with no block move crosses outside a section
- *   => blockStart         first block in section
- *   => blockEnd           last block in section
+ * -> sections[]:          array, block sections with no block move crosses outside a section
+ *   => blockStart           first block in section
+ *   => blockEnd             last block in section
 
- * -> groups[]:          array, section blocks that are consecutive in old text order
- *   => oldNumber          first block oldNumber
- *   => blockStart         first block index
- *   => blockEnd           last block index
- *   => unique             contains unique matched token
- *   => maxWords           word count of longest block
- *   => words              word count
- *   => chars              char count
- *   => fixed              not moved from original position
- *   => movedFrom          group position this group has been moved from
- *   => color              color number of moved group
+ * -> groups[]:            array, section blocks that are consecutive in old text order
+ *   => oldNumber            first block oldNumber
+ *   => blockStart           first block index
+ *   => blockEnd             last block index
+ *   => unique               contains unique linked token
+ *   => maxWords             word count of longest block
+ *   => words                word count
+ *   => chars                char count
+ *   => fixed                not moved from original position
+ *   => movedFrom            group position this group has been moved from
+ *   => color                color number of moved group
  *
- * -> fragments[]:       diff fragment list ready for markup, abstraction layer for customization
- *   => text               block or mark text
- *   => color              moved block or mark color number
- *   => type               '=', '-', '+'   same, deletion, insertion
- *                         '<', '>'        mark left, mark right
- *                         '(<', '(>', ')' block start and end
- *                         '~', ' ~', '~ ' omission indicators
- *                         '[', ']', ','   fragment start and end, fragment separator
- *                         '{', '}'        container start and end
+ * -> fragments[]:         diff fragment list ready for markup, abstraction layer for customization
+ *   => text                 block or mark text
+ *   => color                moved block or mark color number
+ *   => type                 '=', '-', '+'   same, deletion, insertion
+ *                           '<', '>'        mark left, mark right
+ *                           '(<', '(>', ')' block start and end
+ *                           '~', ' ~', '~ ' omission indicators
+ *                           '[', ']', ','   fragment start and end, fragment separator
+ *                           '{', '}'        container start and end
  *
  * @file
  * @ingroup DifferenceEngine
@@ -118,7 +119,7 @@
 
 
 /**
- * wikEd diff main class
+ * wikEd diff main class.
  *
  * @class WikEdDiff
  * @ingroup DifferenceEngine
@@ -128,7 +129,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Integration into DifferenceEngine through new hook CustomDifferenceEngine
+	 * Integration into DifferenceEngine through new hook GenerateTextDiffBody:
 	 *
 	 * Add the following code to DifferenceEngine.php in function generateTextDiffBody after
 	 *   "$ntext = str_replace( "\r\n", "\n", $ntext );":
@@ -136,8 +137,8 @@ class WikEdDiff extends DifferenceEngine {
 	 * @code
 	 *
 	 * # Custom difference engine hook
-	 * wfRunHooks( 'CustomDifferenceEngine', array( &$otext, &$ntext, &$diffText ) );
-	 * if ( $diffText !== false ) {
+	 * $diffText = '';
+	 * if ( !wfRunHooks( 'GenerateTextDiffBody', array( &$otext, &$ntext, &$diffText ) ) ) {
 	 *   wfProfileOut( __METHOD__ );
 	 *   return $diffText;
 	 * }
@@ -145,9 +146,10 @@ class WikEdDiff extends DifferenceEngine {
 	 * @endcode
 	 *
 	 * @param[in/out] string $newText, $otext New an old text versions
-	 * @param[in/out] string|bool $diffText Diff html result or false
+	 * @param[in/out] string|bool $diffText Diff html result
+	 * @return bool False: $diffText contains valid diff; true: use system default diff method
 	 */
-	public static function onCustomDifferenceEngine ( &$otext, &$ntext, &$diffText ) {
+	public static function onGenerateTextDiffBody ( &$otext, &$ntext, &$diffText ) {
 
 		global $wgContLang, $wgOut;
 
@@ -158,12 +160,14 @@ class WikEdDiff extends DifferenceEngine {
 		$otext = $wgContLang->segmentForDiff( $otext );
 		$ntext = $wgContLang->segmentForDiff( $ntext );
 		$diffText = $wgContLang->unsegmentForDiff( $wikEdDiff->diff( $otext, $ntext ) );
+		return false;
 	}
+
 
 	/** @var array $config Configuration and customization settings */
 	protected $config = array(
 
-		/** Core diff settings (with default values) */
+		/** Core diff settings (with default values). */
 
 		/**
 		 * @var bool $config['fullDiff']
@@ -173,7 +177,7 @@ class WikEdDiff extends DifferenceEngine {
 
 		/**
 		 * @var bool $config['showBlockMoves']
-		 *   Enable block move layout with highlighted blocks and marks at their original positions (true)
+		 *   Enable block move layout with highlighted blocks and marks at the original positions (true)
 		 */
 		'showBlockMoves' => true,
 
@@ -182,6 +186,12 @@ class WikEdDiff extends DifferenceEngine {
 		 *   Enable character-refined diff (true)
 		 */
 		'charDiff' => true,
+
+		/**
+		 * @var bool $config['repeatedDiff']
+		 *   Enable repeated diff to resolve problematic sequences (true)
+		 */
+		'repeatedDiff' => true,
 
 		/**
 		 * @var bool $config['recursiveDiff']
@@ -234,7 +244,7 @@ class WikEdDiff extends DifferenceEngine {
 
 		/**
 		 * @var bool $config['debug']
-		 *   Show debug infos and stats (block, group, and fragment data objects) in debug console (false)
+		 *   Show debug infos and stats (block, group, and fragment data) in debug console (false)
 		 */
 		'debug' => false,
 
@@ -250,7 +260,7 @@ class WikEdDiff extends DifferenceEngine {
 		 */
 		'unitTesting' => false,
 
-		/** RegExp character classes */
+		/** RegExp character classes. */
 
 		// UniCode letters
 		'regExpLetters' => '\pL\pN',
@@ -277,10 +287,9 @@ class WikEdDiff extends DifferenceEngine {
 		'regExpQuestionMarks' =>
 			'\x{037e}\x{055e}\x{061f}\x{1367}\x{1945}\x{2047}\x{2049}\x{2cfa}\x{2cfb}\x{2e2e}\x{a60f}\x{a6f7}\x{fe56}\x{ff1f}',
 
-		/** Clip settings */
+		/** Clip settings. */
 
 		// Find clip position: characters from right
-		// (heading, paragraph, line break, blanks, or characters)
 		'clipHeadingLeft'      => 1500,
 		'clipParagraphLeftMax' => 1500,
 		'clipParagraphLeftMin' =>  500,
@@ -291,7 +300,6 @@ class WikEdDiff extends DifferenceEngine {
 		'clipCharsLeft'        =>  500,
 
 		// Find clip position: characters from right
-		// (heading, paragraph, line break, blanks, or characters)
 		'clipHeadingRight'      => 1500,
 		'clipParagraphRightMax' => 1500,
 		'clipParagraphRightMin' =>  500,
@@ -310,13 +318,26 @@ class WikEdDiff extends DifferenceEngine {
 		'clipSkipChars' => 1000,
 	);
 
-	/** Internal data structures */
+	/** Internal data structures. */
 
 	/** @var WikEdDiffText $newText New text version object with text and token list */
 	protected $newText = array();
 
 	/** @var WikEdDiffText $oldText Old text version object with text and token list */
 	protected $oldText = array();
+
+	/** @var array $symbols Symbols table for whole text at all refinement levels */
+	protected $symbols = array(
+		'token' => array(),
+		'hashTable' => array(),
+		'linked' => false
+	);
+
+	/** @var array $bordersDown Matched region borders downwards */
+	protected $bordersDown = array();
+
+	/** @var array $bordersUp Matched region borders upwards */
+	protected $bordersUp = array();
 
 	/** @var array $blocks Block data (consecutive text tokens) in new text order */
 	protected $blocks = array();
@@ -346,7 +367,8 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Constructor, initialize settings
+	 * Constructor, initialize settings.
+	 *
 	 * @param[in] mixed $wgWikEd... LocalSettings configuration variables
 	 * @param[out] array $config Settings
 	 */
@@ -355,6 +377,7 @@ class WikEdDiff extends DifferenceEngine {
 		global $wgWikEdDiffFullDiff,
 			$wgWikEdDiffShowBlockMoves,
 			$wgWikEdDiffCharDiff,
+			$wgWikEdDiffRepeatedDiff,
 			$wgWikEdDiffRecursiveDiff,
 			$wgWikEdDiffRecursionMax,
 			$wgWikEdDiffUnlinkBlocks,
@@ -367,7 +390,7 @@ class WikEdDiff extends DifferenceEngine {
 			$wgWikEdDiffTimer,
 			$wgWikEdDiffUnitTesting;
 
-		/** Add $wgWikEd... settings to configuration settings */
+		/** Add $wgWikEd... settings to configuration settings. */
 		if ( $wgWikEdDiffFullDiff !== null ) {
 			$this->config['fullDiff'] = $wgWikEdDiffFullDiff;
 		}
@@ -376,6 +399,9 @@ class WikEdDiff extends DifferenceEngine {
 		}
 		if ( $wgWikEdDiffCharDiff !== null ) {
 			$this->config['charDiff'] = $wgWikEdDiffCharDiff ;
+		}
+		if ( $wgWikEdDiffRepeatedDiff !== null ) {
+			$this->config['repeatedDiff'] = $wgWikEdDiffRepeatedDiff;
 		}
 		if ( $wgWikEdDiffRecursiveDiff !== null ) {
 			$this->config['recursiveDiff'] = $wgWikEdDiffRecursiveDiff;
@@ -411,7 +437,7 @@ class WikEdDiff extends DifferenceEngine {
 			$this->config['unitTesting'] = $wgWikEdDiffUnitTesting;
 		}
 
-		/** Add regular expressions to configuration settings */
+		/** Add regular expressions to configuration settings. */
 
 		$this->config['regExp'] = array(
 
@@ -421,17 +447,23 @@ class WikEdDiff extends DifferenceEngine {
 				// Split into paragraphs, after double newlines
 				'paragraph' => '/.*?((\r\n|\n|\r){2,}|[' . $this->config['regExpNewParagraph'] . '])+/su',
 
-				// Split into sentences, after .space and newlines
+				// Split into sentences
+				// /[^ \n][^\n]*?[.!?;]+(?=[ \n]|$)|\r\n|\n|\r/
 				'sentence' =>
 					'/[^' .
+					$this->config['regExpBlanks'] .
 					$this->config['regExpNewLinesAll'] .
-					']*?([.!?;' .
+					'][^' .
+					$this->config['regExpNewLinesAll'] .
+					']*?[.!?;' .
 					$this->config['regExpFullStops'] .
 					$this->config['regExpExclamationMarks'] .
 					$this->config['regExpQuestionMarks'] .
-					']+[' . $this->config['regExpBlanks'] .
-					']+)?([' . $this->config['regExpNewLines'] .
-					']|\r\n|\n|\r)/u',
+					']+(?=[' .
+					$this->config['regExpBlanks'] .
+					$this->config['regExpNewLinesAll'] .
+					']|$)|[' . $this->config['regExpNewLines'] .
+					']|\r\n|\n|\r/u',
 
 				// Split into inline chunks
 				'chunk' =>
@@ -454,18 +486,24 @@ class WikEdDiff extends DifferenceEngine {
 				'character' => '/./u',
 			),
 
+			// RegExp to detect blank tokens
+			'blankOnlyToken' =>
+				'/[^' .
+				$this->config['regExpBlanks'] .
+				$this->config['regExpNewLinesAll'] .
+				$this->config['regExpNewParagraph'] .
+				']/u',
+
 			// RegExps for sliding gaps: newlines and space/word breaks
 			'slideStop' =>
 				'/[' .
-				$this->config['regExpBlanks'] .
 				$this->config['regExpNewLinesAll'] .
 				$this->config['regExpNewParagraph'] .
 				']$/u',
 			'slideBorder' =>
-				'/[ \t' .
-				$this->config['regExpNewLinesAll'] .
-				$this->config['regExpNewParagraph'] .
-				'\x{0C}\x{0b}]$/u',
+				'/[' .
+				$this->config['regExpBlanks'] .
+				']$/u',
 
 			// RegExps for counting words
 			'countWords' =>
@@ -522,11 +560,11 @@ class WikEdDiff extends DifferenceEngine {
 		);
 
 	/**
-	 * Add output html fragments to configuration settings
-	 *   Dynamic replacements:
-	 *     {number}: class/color/block/mark/id number
-	 *     {title}: title attribute (popup)
-	 *     {nounicode}: noUnicodeSymbols fallback
+	 * Add output html fragments to configuration settings.
+	 * Dynamic replacements:
+	 *   {number}: class/color/block/mark/id number
+	 *   {title}: title attribute (popup)
+	 *   {nounicode}: noUnicodeSymbols fallback
 	 */
 		$this->config['htmlCode'] = array(
 			'noChangeStart' =>
@@ -540,11 +578,11 @@ class WikEdDiff extends DifferenceEngine {
 				'<td class="wikEdDiffTableCell" colspan="4">',
 			'mediaWikiTableEnd' => '</td></tr>',
 
-			'containerStart' => '<div class="wikEdDiffContainer" id="wikEdDiffContainer">',
+			'containerStart' => '<div class="wikEdDiffContainer" id="wikEdDiffContainerExt">',
 			'containerEnd' => '</div>',
 
-			'fragmentStart' => '<div class="wikEdDiffFragment" style="white-space: pre-wrap;">',
-			'fragmentEnd' => '</div>',
+			'fragmentStart' => '<pre class="wikEdDiffFragment" style="white-space: pre-wrap;">',
+			'fragmentEnd' => '</pre>',
 			'separator' => '<div class="wikEdDiffSeparator"></div>',
 
 			'insertStart' =>
@@ -568,29 +606,32 @@ class WikEdDiff extends DifferenceEngine {
 			'deleteEnd' => '</span>',
 
 			'blockStart' =>
-				'<span class="wikEdDiffBlock" title="{title}" id="wikEdDiffBlock{number}"' .
-				'onmouseover="wikEdDiffBlockHandler(undefined, this, \'mouseover\');">',
+				'<span class="wikEdDiffBlock"' .
+				'title="{title}" id="wikEdDiffBlockExt{number}"' .
+				'onmouseover="wikEdDiffBlockHandlerExt(undefined, this, \'mouseover\');">',
 			'blockColoredStart' =>
 				'<span class="wikEdDiffBlock wikEdDiffBlock wikEdDiffBlock{number}"' .
-				'title="{title}" id="wikEdDiffBlock{number}"' .
-				'onmouseover="wikEdDiffBlockHandler(undefined, this, \'mouseover\');">',
+				'title="{title}" id="wikEdDiffBlockExt{number}"' .
+				'onmouseover="wikEdDiffBlockHandlerExt(undefined, this, \'mouseover\');">',
 			'blockEnd' => '</span>',
 
 			'markLeft' =>
-				'<span class="wikEdDiffMarkLeft{nounicode}" title="{title}" id="wikEdDiffMark{number}"' .
-				'onmouseover="wikEdDiffBlockHandler(undefined, this, \'mouseover\');"></span>',
+				'<span class="wikEdDiffMarkLeft{nounicode}"' .
+				'title="{title}" id="wikEdDiffMarkExt{number}"' .
+				'onmouseover="wikEdDiffBlockHandlerExt(undefined, this, \'mouseover\');"></span>',
 			'markLeftColored' =>
 				'<span class="wikEdDiffMarkLeft{nounicode} wikEdDiffMark wikEdDiffMark{number}"' .
-				'title="{title}" id="wikEdDiffMark{number}"' .
-				'onmouseover="wikEdDiffBlockHandler(undefined, this, \'mouseover\');"></span>',
+				'title="{title}" id="wikEdDiffMarkExt{number}"' .
+				'onmouseover="wikEdDiffBlockHandlerExt(undefined, this, \'mouseover\');"></span>',
 
 			'markRight' =>
-				'<span class="wikEdDiffMarkRight{nounicode}" title="{title}" id="wikEdDiffMark{number}"' .
-				'onmouseover="wikEdDiffBlockHandler(undefined, this, \'mouseover\');"></span>',
+				'<span class="wikEdDiffMarkRight{nounicode}"' .
+				'title="{title}" id="wikEdDiffMarkExt{number}"' .
+				'onmouseover="wikEdDiffBlockHandlerExt(undefined, this, \'mouseover\');"></span>',
 			'markRightColored' =>
 				'<span class="wikEdDiffMarkRight{nounicode} wikEdDiffMark wikEdDiffMark{number}"
-				title="{title}" id="wikEdDiffMark{number}"' .
-				'onmouseover="wikEdDiffBlockHandler(undefined, this, \'mouseover\');"></span>',
+				title="{title}" id="wikEdDiffMarkExt{number}"' .
+				'onmouseover="wikEdDiffBlockHandlerExt(undefined, this, \'mouseover\');"></span>',
 
 			'newline' => "<span class=\"wikEdDiffNewline\">\n</span>",
 			'tab' => "<span class=\"wikEdDiffTab\"><span class=\"wikEdDiffTabSymbol\"></span>\t</span>",
@@ -606,11 +647,12 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Main diff method
+	 * Main diff method.
 	 *
 	 * @param string $oldString Old text version
 	 * @param string $newString New text version
-	 * @param[out] array $fragment Diff fragment list ready for markup, abstraction layer for customized diffs
+	 * @param[out] array $fragment
+	 *   Diff fragment list ready for markup, abstraction layer for customized diffs
 	 * @param[out] string $html Html code of diff
 	 * @return string Html code of diff
 	 */
@@ -634,14 +676,12 @@ class WikEdDiff extends DifferenceEngine {
 		$this->oldText = new WikEdDiffText( $oldString, $this );
 
 		// Trap trivial changes: no change
-		if ( $this->newText->text == $this->oldText->text ) {
+		if ( $this->newText->text === $this->oldText->text ) {
 			$this->html =
 				$this->config['htmlCode']['containerStart'] .
-				$this->config['htmlCode']['fragmentStart'] .
 				$this->config['htmlCode']['noChangeStart'] .
 				wfMessage( 'wiked-diff-empty' )->escaped() .
 				$this->config['htmlCode']['noChangeEnd'] .
-				$this->config['htmlCode']['fragmentEnd'] .
 				$this->config['htmlCode']['containerEnd'];
 
 			// Pack into MediaWiki diff table row
@@ -652,8 +692,8 @@ class WikEdDiff extends DifferenceEngine {
 		// Trap trivial changes: old text deleted
 		if (
 			$this->oldText->text === '' || (
-				$this->oldText->text == "\n" &&
-				substr( $this->newText->text, strlen( $this->newText->text ) - 1 ) == "\n"
+				$this->oldText->text === "\n" &&
+				substr( $this->newText->text, strlen( $this->newText->text ) - 1 ) === "\n"
 			)
 		) {
 			$this->html =
@@ -673,8 +713,8 @@ class WikEdDiff extends DifferenceEngine {
 		// Trap trivial changes: new text deleted
 		if (
 			$this->newText->text === '' || (
-				$this->newText->text == "\n" &&
-				substr( $this->oldText->text, strlen( $this->oldText->text ) - 1 ) == "\n"
+				$this->newText->text === "\n" &&
+				substr( $this->oldText->text, strlen( $this->oldText->text ) - 1 ) === "\n"
 			)
 		) {
 			$this->html =
@@ -691,26 +731,19 @@ class WikEdDiff extends DifferenceEngine {
 			return $this->html;
 		}
 
-		// New symbols object
-		$symbols = array(
-			'token' => array(),
-			'hashTable' => array(),
-			'linked' => false
-		);
-
 		// Split new and old text into paragraps
 		$this->newText->splitText( 'paragraph' );
 		$this->oldText->splitText( 'paragraph' );
 
 		// Calculate diff
-		$this->calculateDiff( $symbols, 'paragraph' );
+		$this->calculateDiff( 'paragraph' );
 
 		// Refine different paragraphs into sentences
 		$this->newText->splitRefine( 'sentence' );
 		$this->oldText->splitRefine( 'sentence' );
 
 		// Calculate refined diff
-		$this->calculateDiff( $symbols, 'sentence' );
+		$this->calculateDiff( 'sentence' );
 
 		// Refine different paragraphs into chunks
 		if ( $this->config['timer'] === true ) {
@@ -723,7 +756,7 @@ class WikEdDiff extends DifferenceEngine {
 		}
 
 		// Calculate refined diff
-		$this->calculateDiff( $symbols, 'chunk' );
+		$this->calculateDiff( 'chunk' );
 
 		// Refine different sentences into words
 		if ( $this->config['timer'] === true ) {
@@ -736,7 +769,7 @@ class WikEdDiff extends DifferenceEngine {
 		}
 
 		// Calculate refined diff information with recursion for unresolved gaps
-		$this->calculateDiff( $symbols, 'word', false, true );
+		$this->calculateDiff( 'word', true );
 
 		// Slide gaps
 		if ( $this->config['timer'] === true ) {
@@ -761,7 +794,7 @@ class WikEdDiff extends DifferenceEngine {
 			}
 
 			// Calculate refined diff information with recursion for unresolved gaps
-			$this->calculateDiff( $symbols, 'character', false, true );
+			$this->calculateDiff( 'character', true );
 
 			// Slide gaps
 			if ( $this->config['timer'] === true ) {
@@ -773,6 +806,11 @@ class WikEdDiff extends DifferenceEngine {
 				$this->timeEnd( 'character slide' );
 			}
 		}
+
+		// free memory
+		unset( $this->symbols );
+		unset( $this->bordersDown );
+		unset( $this->bordersUp );
 
 		// Enumerate token lists
 		$this->newText->enumerateTokens();
@@ -787,8 +825,17 @@ class WikEdDiff extends DifferenceEngine {
 			$this->timeEnd( 'blocks' );
 		}
 
+		// free memory
+		unset( $this->newText->tokens );
+		unset( $this->oldText->tokens );
+
 		// Assemble blocks into fragment table
 		$this->getDiffFragments();
+
+		// free memory
+		unset( $this->blocks );
+		unset( $this->groups );
+		unset( $this->sections );
 
 		// Stop diff timer
 		if ( $this->config['timer'] === true ) {
@@ -834,17 +881,17 @@ class WikEdDiff extends DifferenceEngine {
 		if ( $this->html === '' ) {
 			$this->html =
 				$this->config['htmlCode']['containerStart'] .
-				$this->config['htmlCode']['fragmentStart'] .
 				$this->config['htmlCode']['noChangeStart'] .
 				wfMessage( 'wiked-diff-same' )->escaped() .
 				$this->config['htmlCode']['noChangeEnd'] .
-				$this->config['htmlCode']['fragmentEnd'] .
 				$this->config['htmlCode']['containerEnd'];
 		}
 
 		// Add error indicator
 		if ( $this->error === true ) {
-			$this->html = $this->config['htmlCode']['errorStart'] . $this->html . $this->config['htmlCode']['errorEnd'];
+			$this->html =
+				$this->config['htmlCode']['errorStart'] .
+				$this->html . $this->config['htmlCode']['errorEnd'];
 		}
 
 		// Pack into MediaWiki diff table row
@@ -855,17 +902,12 @@ class WikEdDiff extends DifferenceEngine {
 			$this->timeEnd( 'total' );
 		}
 
-		// Debug log
-		if ( $this->config['debug'] === true ) {
-			$this->debug( 'HTML', $this->html );
-		}
-
 		return $this->html;
 	}
 
 
 	/**
-	 * Pack diff html code into MediaWiki diff table row
+	 * Pack diff html code into MediaWiki diff table row.
 	 *
 	 * @param[in/out] string $html Html code of diff
 	 */
@@ -887,7 +929,7 @@ class WikEdDiff extends DifferenceEngine {
 	 *     - Same length and at least 50 % identity
 	 *     - Same start or end, same text longer than different text
 	 * Identical tokens including space separators will be linked,
-	 *   resulting in word-wise char-level diffs
+	 * resulting in word-wise char-level diffs.
 	 *
 	 * @param[in/out] WikEdDiffText $newText, $oldText Text object tokens list
 	 */
@@ -895,7 +937,7 @@ class WikEdDiff extends DifferenceEngine {
 
 		/** Find corresponding gaps */
 
-		// Cycle trough new text tokens list
+		// Cycle through new text tokens list
 		$gaps = array();
 		$gap = null;
 		$i = $this->newText->first;
@@ -941,10 +983,10 @@ class WikEdDiff extends DifferenceEngine {
 			$i = $this->newText->tokens[$i]['next'];
 		}
 
-		// Cycle trough gaps and add old text gap data
-		for ( $gap = 0; $gap < count( $gaps ); $gap ++ ) {
+		// Cycle through gaps and add old text gap data
+		for ( $gap = 0, $gapsLength = count( $gaps ); $gap < $gapsLength; $gap ++ ) {
 
-			// Cycle trough old text tokens list
+			// Cycle through old text tokens list
 			$j = $gaps[$gap]['oldFirst'];
 			while (
 				$j !== null && $this->oldText->tokens[$j] !== null &&
@@ -959,16 +1001,16 @@ class WikEdDiff extends DifferenceEngine {
 			}
 		}
 
-		/** Select gaps of identical token number and strong similarity of all tokens */
+		/** Select gaps of identical token number and strong similarity of all tokens. */
 
-		for ( $gap = 0; $gap < count( $gaps ); $gap ++ ) {
+		for ( $gap = 0, $gapsLength = count( $gaps ); $gap < $gapsLength; $gap ++ ) {
 			$charSplit = true;
 
 			// Not same gap length
-			if ( $gaps[$gap]['newTokens'] != $gaps[$gap]['oldTokens'] ) {
+			if ( $gaps[$gap]['newTokens'] !== $gaps[$gap]['oldTokens'] ) {
 
 				// One word became separated by space, dash, or any string
-				if ( $gaps[$gap]['newTokens'] == 1 && $gaps[$gap]['oldTokens'] == 3 ) {
+				if ( $gaps[$gap]['newTokens'] === 1 && $gaps[$gap]['oldTokens'] === 3 ) {
 					$token = $this->newText->tokens[ $gaps[$gap]['newFirst'] ]['token'];
 					$tokenFirst = $this->oldText->tokens[ $gaps[$gap]['oldFirst'] ]['token'];
 					$tokenLast = $this->oldText->tokens[ $gaps[$gap]['oldLast'] ]['token'];
@@ -978,7 +1020,7 @@ class WikEdDiff extends DifferenceEngine {
 					) {
 						continue;
 					}
-				} elseif ( $gaps[$gap]['oldTokens'] == 1 && $gaps[$gap]['newTokens'] == 3 ) {
+				} elseif ( $gaps[$gap]['oldTokens'] === 1 && $gaps[$gap]['newTokens'] === 3 ) {
 					$token = $this->oldText->tokens[ $gaps[$gap]['oldFirst'] ]['token'];
 					$tokenFirst = $this->newText->tokens[ $gaps[$gap]['newFirst'] ]['token'];
 					$tokenLast = $this->newText->tokens[ $gaps[$gap]['newLast'] ]['token'];
@@ -994,7 +1036,7 @@ class WikEdDiff extends DifferenceEngine {
 				$gaps[$gap]['charSplit'] = true;
 			}
 
-			// Cycle trough new text tokens list and set charSplit
+			// Cycle through new text tokens list and set charSplit
 			else {
 				$i = $gaps[$gap]['newFirst'];
 				$j = $gaps[$gap]['oldFirst'];
@@ -1012,14 +1054,14 @@ class WikEdDiff extends DifferenceEngine {
 					}
 
 					// Not same token length
-					if ( strlen( $newToken ) != strlen( $oldToken ) ) {
+					if ( strlen( $newToken ) !== strlen( $oldToken ) ) {
 
 						// Test for addition or deletion of internal string in tokens
 
 						// Find number of identical chars from left
 						$left = 0;
 						while ( $left < strlen( $shorterToken ) ) {
-							if ( $newToken[$left] != $oldToken[$left] ) {
+							if ( $newToken[$left] !== $oldToken[$left] ) {
 								break;
 							}
 							$left ++;
@@ -1029,7 +1071,8 @@ class WikEdDiff extends DifferenceEngine {
 						$right = 0;
 						while ( $right < strlen( $shorterToken ) ) {
 							if (
-								$newToken[strlen( $newToken ) - 1 - $right] != $oldToken[strlen( $oldToken ) - 1 - $right]
+								$newToken[strlen( $newToken ) - 1 - $right] !=
+								$oldToken[strlen( $oldToken ) - 1 - $right]
 							) {
 								break;
 							}
@@ -1037,9 +1080,10 @@ class WikEdDiff extends DifferenceEngine {
 						}
 
 						// No simple insertion or deletion of internal string
-						if ( $left + $right != strlen( $shorterToken ) ) {
+						if ( $left + $right !== strlen( $shorterToken ) ) {
 
-							// Not addition or deletion of flanking strings in tokens (smaller token not part of larger token)
+							// Not addition or deletion of flanking strings in tokens
+							// Smaller token not part of larger token
 							if ( strpos( $longerToken, $shorterToken ) === false ) {
 
 								// Same text at start or end shorter than different text
@@ -1054,12 +1098,12 @@ class WikEdDiff extends DifferenceEngine {
 					}
 
 					// Same token length
-					elseif ( $newToken != $oldToken ) {
+					elseif ( $newToken !== $oldToken ) {
 
 						// Tokens less than 50 % identical
 						$ident = 0;
-						for ( $pos = 0; $pos < strlen( $shorterToken ); $pos ++ ) {
-							if ( $shorterToken[$pos] == $longerToken[$pos] ) {
+						for ( $pos = 0, $tokenLength = strlen( $shorterToken ); $pos < $tokenLength; $pos ++ ) {
+							if ( $shorterToken[$pos] === $longerToken[$pos] ) {
 								$ident ++;
 							}
 						}
@@ -1072,7 +1116,7 @@ class WikEdDiff extends DifferenceEngine {
 					}
 
 					// Next list elements
-					if ( $i == $gaps[$gap]['newLast'] ) {
+					if ( $i === $gaps[$gap]['newLast'] ) {
 						break;
 					}
 					$i = $this->newText->tokens[$i]['next'];
@@ -1082,12 +1126,12 @@ class WikEdDiff extends DifferenceEngine {
 			}
 		}
 
-		/** Refine words into chars in selected gaps */
+		/** Refine words into chars in selected gaps. */
 
-		for ( $gap = 0; $gap < count( $gaps ); $gap ++ ) {
+		for ( $gap = 0, $gapsLength = count( $gaps ); $gap < $gapsLength; $gap ++ ) {
 			if ( $gaps[$gap]['charSplit'] === true ) {
 
-				// Cycle trough new text tokens list, link spaces, and split into chars
+				// Cycle through new text tokens list, link spaces, and split into chars
 				$i = $gaps[$gap]['newFirst'];
 				$j = $gaps[$gap]['oldFirst'];
 				$newGapLength = $i - $gaps[$gap]['newLast'];
@@ -1096,8 +1140,8 @@ class WikEdDiff extends DifferenceEngine {
 
 					// Link identical tokens (spaces) to keep char refinement to words
 					if (
-						$newGapLength == $oldGapLength &&
-						$this->newText->tokens[$i]['token'] == $this->oldText->tokens[$j]['token']
+						$newGapLength === $oldGapLength &&
+						$this->newText->tokens[$i]['token'] === $this->oldText->tokens[$j]['token']
 					) {
 						$this->newText->tokens[$i]['link'] = $j;
 						$this->oldText->tokens[$j]['link'] = $i;
@@ -1114,10 +1158,10 @@ class WikEdDiff extends DifferenceEngine {
 					}
 
 					// Next list elements
-					if ( $i == $gaps[$gap]['newLast'] ) {
+					if ( $i === $gaps[$gap]['newLast'] ) {
 						$i = null;
 					}
-					if ( $j == $gaps[$gap]['oldLast'] ) {
+					if ( $j === $gaps[$gap]['oldLast'] ) {
 						$j = null;
 					}
 					if ( $i !== null ) {
@@ -1133,7 +1177,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Move gaps with ambiguous identical fronts to last newline border or otherwise last word border
+	 * Move gaps with ambiguous identical fronts to last newline border or otherwise last word border.
 	 *
 	 * @param[in/out] wikEdDiffText $text, $textLinked These two are $newText and $oldText
 	 */
@@ -1158,9 +1202,11 @@ class WikEdDiff extends DifferenceEngine {
 				$front = $gapFront;
 				$back = $text->tokens[$gapBack]['next'];
 				if (
-					( $front !== null && $back !== null ) &&
-					( $text->tokens[$front]['link'] === null && $text->tokens[$back]['link'] !== null ) &&
-					( $text->tokens[$front]['token'] === $text->tokens[$back]['token'] )
+					$front !== null &&
+					$back !== null &&
+					$text->tokens[$front]['link'] === null &&
+					$text->tokens[$back]['link'] !== null &&
+					$text->tokens[$front]['token'] === $text->tokens[$back]['token']
 				) {
 					$text->tokens[$front]['link'] = $text->tokens[$back]['link'];
 					$textLinked->tokens[ $text->tokens[$front]['link'] ]['link'] = $front;
@@ -1176,28 +1222,36 @@ class WikEdDiff extends DifferenceEngine {
 				// Test slide up, remember last line break or word border
 				$front = $text->tokens[$gapFront]['prev'];
 				$back = $gapBack;
-				$gapFrontBlankTest = preg_match( $this->config['regExp']['slideBorder'], $text->tokens[$gapFront]['token'] );
+				$gapFrontBlankTest = preg_match(
+					$this->config['regExp']['slideBorder'],
+					$text->tokens[$gapFront]['token']
+				);
 				$frontStop = $front;
 				if  ( $text->tokens[$back]['link'] === null ) {
 					while (
-						$front !== null && $back !== null &&
+						$front !== null &&
+						$back !== null &&
 						$text->tokens[$front]['link'] !== null &&
-						$text->tokens[$front]['token'] == $text->tokens[$back]['token']
+						$text->tokens[$front]['token'] === $text->tokens[$back]['token']
 					) {
 						$front = $text->tokens[$front]['prev'];
 						$back = $text->tokens[$back]['prev'];
-
-						// Stop at line break
 						if ( $front !== null ) {
-							if ( preg_match( $this->config['regExp']['slideStop'], $text->tokens[$front]['token'] ) === 1 ) {
+
+							// Stop at line break
+							if ( preg_match(
+								$this->config['regExp']['slideStop'],
+								$text->tokens[$front]['token']
+							) === 1 ) {
 								$frontStop = $front;
 								break;
 							}
 
 							// Stop at first word border (blank/word or word/blank)
-							if (
-								preg_match( $this->config['regExp']['slideBorder'], $text->tokens[$front]['token'] ) !== $gapFrontBlankTest
-							) {
+							if ( preg_match(
+								$this->config['regExp']['slideBorder'],
+								$text->tokens[$front]['token']
+							) !== $gapFrontBlankTest ) {
 								$frontStop = $front;
 							}
 						}
@@ -1208,9 +1262,11 @@ class WikEdDiff extends DifferenceEngine {
 				$front = $text->tokens[$gapFront]['prev'];
 				$back = $gapBack;
 				while (
-					$front !== null && $back !== null && $front !== $frontStop &&
+					$front !== null &&
+					$back !== null &&
+					$front !== $frontStop &&
 					$text->tokens[$front]['link'] !== null && $text->tokens[$back]['link'] === null &&
-					$text->tokens[$front]['token'] == $text->tokens[$back]['token']
+					$text->tokens[$front]['token'] === $text->tokens[$back]['token']
 				) {
 					$text->tokens[$back]['link'] = $text->tokens[$front]['link'];
 					$textLinked->tokens[ $text->tokens[$back]['link'] ]['link'] = $back;
@@ -1227,12 +1283,12 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Calculate diff information, can be called repeatedly during refining
+	 * Calculate diff information, can be called repeatedly during refining.
 	 * Links corresponding tokens from old and new text.
 	 * Steps:
 	 *   Pass 1: parse new text into symbol table
 	 *   Pass 2: parse old text into symbol table
-	 *   Pass 3: connect unique matched tokens
+	 *   Pass 3: connect unique matching tokens
 	 *   Pass 4: connect adjacent identical tokens downwards
 	 *   Pass 5: connect adjacent identical tokens upwards
 	 *   Repeat with empty symbol table (against crossed-over gaps)
@@ -1243,48 +1299,61 @@ class WikEdDiff extends DifferenceEngine {
 	 * @param string level Split level: 'paragraph', 'sentence', 'chunk', 'word', or 'character'
 	 *
 	 * Optionally for recursive or repeated calls:
-	 * @param bool $repeat Repeat with empty symbol table
+	 * @param bool $repeating Currently repeating with empty symbol table
 	 * @param bool $recurse Enable recursion
 	 * @param int $newStart, $newEnd, $oldStart, $oldEnd Text object tokens indices
 	 * @param int $recursionLevel Recursion level
 	 * @param[in/out] WikEdDiffText $newText, $oldText Text object, tokens list link property
 	 */
 	private function calculateDiff (
-		&$symbols,
 		$level,
-		$repeat = false,
 		$recurse = false,
+		$repeating = false,
 		$newStart = null,
-		$newEnd = null,
 		$oldStart = null,
-		$oldEnd = null,
+		$up = false,
 		$recursionLevel = 0
 	) {
 
 		// Set defaults
 		if ( $newStart === null ) { $newStart = $this->newText->first; }
-		if ( $newEnd   === null ) { $newEnd   = $this->newText->last;  }
 		if ( $oldStart === null ) { $oldStart = $this->oldText->first; }
-		if ( $oldEnd   === null ) { $oldEnd   = $this->oldText->last;  }
 
 		// Start timers
-		if ( $this->config['timer'] === true && $repeat === false && $recursionLevel === 0 ) {
+		if ( $this->config['timer'] === true && $repeating === false && $recursionLevel === 0 ) {
 			$this->time( $level );
 		}
-		if ( $this->config['timer'] === true && $repeat === false ) {
+		if ( $this->config['timer'] === true && $repeating === false ) {
 			$this->time( $level . ( $recursionLevel ) );
 		}
 
-		// Limit recursion depth
-		if ( $recursionLevel > $this->config['recursionMax'] ) {
-			return;
+		// get object symbols table and linked region borders
+		if ( $recursionLevel === 0 && $repeating === false ) {
+			$symbols = &$this->symbols;
+			$bordersDown = &$this->bordersDown;
+			$bordersUp = &$this->bordersUp;
 		}
+
+		// create empty local symbols table and linked region borders arrays
+		else {
+			$symbols = array(
+				'token' => array(),
+				'hashTable' => array(),
+				'linked' => false
+			);
+			$bordersDown = array();
+			$bordersUp = array();
+		}
+
+		// updated versions of linked region borders
+		$bordersUpNext = array();
+		$bordersDownNext = array();
 
 		/**
 		 * Pass 1: parse new text into symbol table.
 		 */
 
-		// Cycle trough new text tokens list
+		// Cycle through new text tokens list
 		$i = $newStart;
 		while ( $i !== null && $this->newText->tokens[$i] !== null ) {
 			if ( $this->newText->tokens[$i]['link'] === null ) {
@@ -1301,8 +1370,8 @@ class WikEdDiff extends DifferenceEngine {
 						'oldToken' => null
 					);
 				}
-				// Or update existing entry
 
+				// Or update existing entry
 				else {
 
 					// Increment token counter for new text
@@ -1311,18 +1380,24 @@ class WikEdDiff extends DifferenceEngine {
 				}
 			}
 
-			// Next list element
-			if ( $i == $newEnd ) {
+			// Stop after gap if recursing
+			elseif ( $recursionLevel > 0 ) {
 				break;
 			}
-			$i = $this->newText->tokens[$i]['next'];
+
+			// get next token
+			if ( $up === false ) {
+				$i = $this->newText->tokens[$i]['next'];
+			} else {
+				$i = $this->newText->tokens[$i]['prev'];
+			}
 		}
 
 		/**
 		 * Pass 2: parse old text into symbol table.
 		 */
 
-		// Cycle trough old text tokens list
+		// Cycle through old text tokens list
 		$j = $oldStart;
 		while ( $j !== null && $this->oldText->tokens[$j] !== null ) {
 			if ( $this->oldText->tokens[$j]['link'] === null ) {
@@ -1352,22 +1427,28 @@ class WikEdDiff extends DifferenceEngine {
 				}
 			}
 
-			// Next list element
-			if ( $j === $oldEnd ) {
+			// Stop after gap if recursing
+			elseif ( $recursionLevel > 0 ) {
 				break;
 			}
-			$j = $this->oldText->tokens[$j]['next'];
+
+			// get next token
+			if ( $up === false ) {
+				$j = $this->oldText->tokens[$j]['next'];
+			} else {
+				$j = $this->oldText->tokens[$j]['prev'];
+			}
 		}
 
 		/**
 		 * Pass 3: connect unique tokens.
 		 */
 
-		// Cycle trough symbol array
-		for ( $i = 0; $i < count( $symbols['token'] ); $i ++ ) {
+		// Cycle through symbol array
+		for ( $i = 0, $symbolsLength = count( $symbols['token'] ); $i < $symbolsLength; $i ++ ) {
 
 			// Find tokens in the symbol table that occur only once in both versions
-			if ( $symbols['token'][$i]['newCount'] == 1 && $symbols['token'][$i]['oldCount'] == 1 ) {
+			if ( $symbols['token'][$i]['newCount'] === 1 && $symbols['token'][$i]['oldCount'] === 1 ) {
 				$newToken = $symbols['token'][$i]['newToken'];
 				$oldToken = $symbols['token'][$i]['oldToken'];
 
@@ -1375,37 +1456,50 @@ class WikEdDiff extends DifferenceEngine {
 				if ( $this->newText->tokens[$newToken]['link'] === null ) {
 
 					// Do not use spaces as unique markers
-					if ( preg_match( '/^\s+$/u', $this->newText->tokens[$newToken]['token'] ) === 0 ) {
+					if ( preg_match(
+						$this->config['regExp']['blankOnlyToken'],
+						$this->newText->tokens[$newToken]['token']
+					) === 1 ) {
+
+						// Link new an old tokens
 						$this->newText->tokens[$newToken]['link'] = $oldToken;
 						$this->oldText->tokens[$oldToken]['link'] = $newToken;
 						$symbols['linked'] = true;
 
+						// save linked region borders
+						array_push( $bordersDown, array( $newToken, $oldToken ) );
+						array_push( $bordersUp, array( $newToken, $oldToken ) );
+
 						// Check if token contains unique word
 						if ( $recursionLevel === 0 ) {
 							$unique = false;
-							if ( $level == 'character' ) {
+							if ( $level === 'character' ) {
 								$unique = true;
 							} else {
 								$token = $this->newText->tokens[$newToken]['token'];
 								preg_match_all( $this->config['regExp']['countWords'], $token, $regExpMatchWord );
 								preg_match_all( $this->config['regExp']['countChunks'], $token, $regExpMatchChunk );
-								$words = array_merge( $regExpMatchWord[0], $regExpMatchChunk[0] );
+								$words = count( $regExpMatchWord[0] ) + count( $regExpMatchChunk[0] );
 
 								// Unique if longer than min block length
-								if ( count( $words ) >= $this->config['blockMinLength'] ) {
+								if ( $words >= $this->config['blockMinLength'] ) {
 									$unique = true;
 								}
 
 								// Unique if it contains at least one unique word
 								else {
-									for ( $word = 0; $word < count( $words ); $word ++ ) {
+									for (
+										$word = 0, $wordsLength = count( $words );
+										$word < $wordsLength;
+										$word ++
+									) {
 										if (
 											isset( $this->oldText->words[ $words[$word] ] ) &&
 											isset( $this->newText->words[ $words[$word] ] )
 										) {
 											if (
-												$this->oldText->words[ $words[$word] ] == 1 &&
-												$this->newText->words[ $words[$word] ] == 1
+												$this->oldText->words[ $words[$word] ] === 1 &&
+												$this->newText->words[ $words[$word] ] === 1
 											) {
 												$unique = true;
 												break;
@@ -1433,321 +1527,262 @@ class WikEdDiff extends DifferenceEngine {
 			 * Pass 4: connect adjacent identical tokens downwards.
 			 */
 
-			// Get surrounding connected tokens
-			$i = $newStart;
-			if ( $this->newText->tokens[$i]['prev'] !== null ) {
-				$i = $this->newText->tokens[$i]['prev'];
-			}
-			$iStop = $newEnd;
-			if ( $this->newText->tokens[$iStop]['next'] !== null ) {
-				$iStop = $this->newText->tokens[$iStop]['next'];
-			}
-			$j = null;
+			// Cycle through list of linked new text tokens
+			for (
+				$match = 0, $bordersLength = count( $bordersDown );
+				$match < $bordersLength;
+				$match ++
+			) {
+				$i = $bordersDown[$match][0];
+				$j = $bordersDown[$match][1];
 
-			// Cycle trough new text tokens list down
-			do {
+				// Next down
+				$iMatch = $i;
+				$jMatch = $j;
+				$i = $this->newText->tokens[$i]['next'];
+				$j = $this->oldText->tokens[$j]['next'];
 
-				// Connected pair
-				$link = $this->newText->tokens[$i]['link'];
-				if ( $link !== null ) {
-					$j = $this->oldText->tokens[$link]['next'];
-				}
-
-				// Connect if tokens are the same
-				elseif (
+				// Cycle through new text list gap region downwards
+				while (
+					$i !== null &&
 					$j !== null &&
-					$this->oldText->tokens[$j]['link'] === null &&
-					$this->newText->tokens[$i]['token'] == $this->oldText->tokens[$j]['token']
+					$this->newText->tokens[$i]['link'] === null &&
+					$this->oldText->tokens[$j]['link'] === null
 				) {
-					$this->newText->tokens[$i]['link'] = $j;
-					$this->oldText->tokens[$j]['link'] = $i;
+
+					// Connect if same token
+					if ( $this->newText->tokens[$i]['token'] === $this->oldText->tokens[$j]['token'] ) {
+						$this->newText->tokens[$i]['link'] = $j;
+						$this->oldText->tokens[$j]['link'] = $i;
+					}
+
+					// Not a match yet, maybe in next refinement level
+					else {
+						array_push( $bordersDownNext, array( $iMatch, $jMatch ) );
+						break;
+					}
+
+					// Next token down
+					$iMatch = $i;
+					$jMatch = $j;
+					$i = $this->newText->tokens[$i]['next'];
 					$j = $this->oldText->tokens[$j]['next'];
 				}
-
-				// Not same
-				else {
-					$j = null;
-				}
-				$i = $this->newText->tokens[$i]['next'];
-			} while ( $i !== $iStop );
+			}
 
 			/**
 			 * Pass 5: connect adjacent identical tokens upwards.
 			 */
 
-			// Get surrounding connected tokens
-			$i = $newEnd;
-			if ( $this->newText->tokens[$i]['next'] !== null ) {
-				$i = $this->newText->tokens[$i]['next'];
-			}
-			$iStop = $newStart;
-			if ( $this->newText->tokens[$iStop]['prev'] !== null ) {
-				$iStop = $this->newText->tokens[$iStop]['prev'];
-			}
-			$j = null;
+			// Cycle through list of connected new text tokens
+			for ( $match = 0, $bordersLength = count( $bordersUp ); $match < $bordersLength; $match ++ ) {
+				$i = $bordersUp[$match][0];
+				$j = $bordersUp[$match][1];
 
-			// Cycle trough new text tokens list up
-			do {
+				// Next up
+				$iMatch = $i;
+				$jMatch = $j;
+				$i = $this->newText->tokens[$i]['prev'];
+				$j = $this->oldText->tokens[$j]['prev'];
 
-				// Connected pair
-				$link = $this->newText->tokens[$i]['link'];
-				if ( $link !== null ) {
-					$j = $this->oldText->tokens[$link]['prev'];
-				}
-
-				// Connect if tokens are the same
-				elseif (
+				// Cycle through new text gap region upwards
+				while (
+					$i !== null &&
 					$j !== null &&
-					$this->oldText->tokens[$j]['link'] === null &&
-					$this->newText->tokens[$i]['token'] == $this->oldText->tokens[$j]['token']
+					$this->newText->tokens[$i]['link'] === null &&
+					$this->oldText->tokens[$j]['link'] === null
 				) {
-					$this->newText->tokens[$i]['link'] = $j;
-					$this->oldText->tokens[$j]['link'] = $i;
+
+					// Connect if same token
+					if ( $this->newText->tokens[$i]['token'] === $this->oldText->tokens[$j]['token'] ) {
+						$this->newText->tokens[$i]['link'] = $j;
+						$this->oldText->tokens[$j]['link'] = $i;
+					}
+
+					// Not a match yet, maybe in next refinement level
+					else {
+						array_push( $bordersUpNext, array( $iMatch, $jMatch ) );
+						break;
+					}
+
+					// Next token up
+					$iMatch = $i;
+					$jMatch = $j;
+					$i = $this->newText->tokens[$i]['prev'];
 					$j = $this->oldText->tokens[$j]['prev'];
 				}
-
-				// Not same
-				else {
-					$j = null;
-				}
-				$i = $this->newText->tokens[$i]['prev'];
-			} while ( $i !== $iStop );
+			}
 
 			/**
-			 * Connect adjacent identical tokens downwards from text start,
-			 * treat boundary as connected, stop after first connected token.
+			 * Connect adjacent identical tokens downwards from text start.
+			 * Treat boundary as connected, stop after first connected token.
 			 */
 
 			// Only for full text diff
-			if ( $newStart == $this->newText->first && $newEnd == $this->newText->last ) {
+			if ( $recursionLevel === 0 && $repeating === false ) {
 
 				// From start
 				$i = $this->newText->first;
 				$j = $this->oldText->first;
+				$iMatch = null;
+				$jMatch = null;
 
-				// Cycle trough new text tokens list down, connect identical tokens, stop after first connected token
+				// Cycle through old text tokens down
+				// Connect identical tokens, stop after first connected token
 				while (
-					$i !== null && $j !== null &&
+					$i !== null &&
+					$j !== null &&
 					$this->newText->tokens[$i]['link'] === null &&
 					$this->oldText->tokens[$j]['link'] === null &&
-					$this->newText->tokens[$i]['token'] == $this->oldText->tokens[$j]['token']
+					$this->newText->tokens[$i]['token'] === $this->oldText->tokens[$j]['token']
 				) {
 					$this->newText->tokens[$i]['link'] = $j;
 					$this->oldText->tokens[$j]['link'] = $i;
+					$iMatch = $i;
+					$jMatch = $j;
 					$i = $this->newText->tokens[$i]['next'];
 					$j = $this->oldText->tokens[$j]['next'];
+				}
+				if ( $iMatch !== null ) {
+					array_push( $bordersDownNext, array( $iMatch, $jMatch ) );
 				}
 
 				// From end
 				$i = $this->newText->last;
 				$j = $this->oldText->last;
+				$iMatch = null;
+				$jMatch = null;
 
-				// Cycle trough old text tokens list up, connect identical tokens, stop after first connected token
+				// Cycle through old text tokens up
+				// Connect identical tokens, stop after first connected token
 				while (
-					$i !== null && $j !== null &&
+					$i !== null &&
+					$j !== null &&
 					$this->newText->tokens[$i]['link'] === null &&
 					$this->oldText->tokens[$j]['link'] === null &&
-					$this->newText->tokens[$i]['token'] == $this->oldText->tokens[$j]['token']
+					$this->newText->tokens[$i]['token'] === $this->oldText->tokens[$j]['token']
 				) {
 					$this->newText->tokens[$i]['link'] = $j;
 					$this->oldText->tokens[$j]['link'] = $i;
+					$iMatch = $i;
+					$jMatch = $j;
 					$i = $this->newText->tokens[$i]['prev'];
 					$j = $this->oldText->tokens[$j]['prev'];
 				}
+				if ( $iMatch !== null ) {
+					array_push( $bordersUpNext, array( $iMatch, $jMatch ) );
+				}
+			}
+
+			// save updated linked region borders to object
+			if ( $recursionLevel === 0 && $repeating === false ) {
+				$this->bordersDown = $bordersDownNext;
+				$this->bordersUp = $bordersUpNext;
+			}
+
+			// merge local updated linked region borders into object
+			else {
+				$this->bordersDown = array_merge( $this->bordersDown, $bordersDownNext );
+				$this->bordersUp = array_merge( $this->bordersUp, $bordersUpNext );
 			}
 
 			/**
-			 * Repeat with empty symbol table to link hidden unresolved common tokens in cross-overs
-			 * ("and" in "and this a and b that" -> "and this a and b that").
+			 * Repeat once with empty symbol table to link hidden unresolved common tokens in cross-overs.
+			 * ("and" in "and this a and b that" -> "and this a and b that")
 			 */
 
-			// New empty symbols object
-			if ( $repeat === false ) {
-				$symbolsRepeat = array(
-					'token' => array(),
-					'hashTable' => array(),
-					'linked' => false
-				);
+			if ( $repeating === false && $this->config['repeatedDiff'] === true ) {
+				$repeat = true;
 				$this->calculateDiff(
-					$symbolsRepeat, $level, true, false,
-					$newStart, $newEnd, $oldStart, $oldEnd
+					$level, $recurse, $repeat, $newStart, $oldStart, $up, $recursionLevel
 				);
 			}
 
 			/**
-			 * Refine by recursively diffing unresolved regions with empty symbol table at word level
-			 * Helps against gaps caused by addition of common tokens around sequences of common tokens
+			 * Refine by recursively diffing not linked regions with new symbol table.
+			 * At word and character level only.
+			 * Helps against gaps caused by addition of common tokens around sequences of common tokens.
 			 */
 
-			if ( $recurse === true && $this->config['recursiveDiff'] === true ) {
+			if (
+				$recurse === true &&
+				$this->config['recursiveDiff'] === true &&
+				$recursionLevel < $this->config['recursionMax']
+			) {
 
 				/**
-				 * Recursively diff still unresolved regions downwards.
+				 * Recursively diff gap downwards.
 				 */
 
-				// Cycle trough new text tokens list
-				$i = $newStart;
-				$j = $oldStart;
+				// Cycle through list of linked region borders
+				for (
+					$match = 0, $bordersLength = count( $bordersDownNext );
+					$match < $bordersLength;
+					$match ++
+				) {
+					$i = $bordersDownNext[$match][0];
+					$j = $bordersDownNext[$match][1];
 
-				while ( $i !== null && $this->newText->tokens[$i] !== null ) {
+					// Next token down
+					$i = $this->newText->tokens[$i]['next'];
+					$j = $this->oldText->tokens[$j]['next'];
 
-					// Get j from previous tokens match
-					$iPrev = $this->newText->tokens[$i]['prev'];
-					if ( $iPrev !== null ) {
-						$jPrev = $this->newText->tokens[$iPrev]['link'];
-						if ( $jPrev !== null ) {
-							$j = $this->oldText->tokens[$jPrev]['next'];
-						}
-					}
-
-					// Check for the start of an unresolved sequence
+					// Start recursion at first gap token pair
 					if (
+						$i !== null &&
 						$j !== null &&
-						$this->oldText->tokens[$j] !== null &&
 						$this->newText->tokens[$i]['link'] === null &&
 						$this->oldText->tokens[$j]['link'] === null
 					) {
-
-						// Determine the limits of the unresolved new sequence
-						$iStart = $i;
-						$iEnd = null;
-						$iLength = 0;
-						$iNext = $i;
-						while ( $iNext !== null && $this->newText->tokens[$iNext]['link'] === null ) {
-							$iEnd = $iNext;
-							$iLength ++;
-							if ( $iEnd == $newEnd ) {
-								break;
-							}
-							$iNext = $this->newText->tokens[$iNext]['next'];
-						}
-
-						// Determine the limits of the unresolved old sequence
-						$jStart = $j;
-						$jEnd = null;
-						$jLength = 0;
-						$jNext = $j;
-						while ( $jNext !== null && $this->oldText->tokens[$jNext]['link'] === null ) {
-							$jEnd = $jNext;
-							$jLength ++;
-							if ( $jEnd == $oldEnd ) {
-								break;
-							}
-							$jNext = $this->oldText->tokens[$jNext]['next'];
-						}
-
-						// Recursively diff the unresolved sequence
-						if ( $iLength > 1 || $jLength > 1 ) {
-
-							// New empty symbols object for sub-region
-							$symbolsRecurse = array(
-								'token' => array(),
-								'hashTable' => array(),
-								'linked' => false
-							);
-							$this->calculateDiff(
-								$symbolsRecurse, $level, false, true,
-								$iStart, $iEnd, $jStart, $jEnd, $recursionLevel + 1
-							);
-						}
-						$i = $iEnd;
+						$repeat = false;
+						$dirUp = false;
+						$this->calculateDiff( $level, $recurse, $repeat, $i, $j, $dirUp, $recursionLevel + 1 );
 					}
-
-					// Next list element
-					if ( $i == $newEnd ) {
-						break;
-					}
-					$i = $this->newText->tokens[$i]['next'];
 				}
 
 				/**
-				 * Recursively diff still unresolved regions upwards.
+				 * Recursively diff gap upwards.
 				 */
 
-				// Cycle trough new text tokens list
-				$i = $newEnd;
-				$j = $oldEnd;
-				while ( $i !== null && $this->newText->tokens[$i] !== null ) {
+				// Cycle through list of linked region borders
+				for (
+					$match = 0, $bordersLength = count( $bordersUpNext );
+					$match < $bordersLength;
+					$match ++
+				) {
+					$i = $bordersUpNext[$match][0];
+					$j = $bordersUpNext[$match][1];
 
-					// Get j from next matched tokens
-					$iPrev = $this->newText->tokens[$i]['next'];
-					if ( $iPrev !== null ) {
-						$jPrev = $this->newText->tokens[$iPrev]['link'];
-						if ( $jPrev !== null ) {
-							$j = $this->oldText->tokens[$jPrev]['prev'];
-						}
-					}
+					// Next token up
+					$i = $this->newText->tokens[$i]['prev'];
+					$j = $this->oldText->tokens[$j]['prev'];
 
-					// Check for the start of an unresolved sequence
+					// Start recursion at first gap token pair
 					if (
+						$i !== null &&
 						$j !== null &&
-						$this->oldText->tokens[$j] !== null &&
 						$this->newText->tokens[$i]['link'] === null &&
 						$this->oldText->tokens[$j]['link'] === null
 					) {
-
-						// Determine the limits of the unresolved new sequence
-						$iStart = null;
-						$iEnd = $i;
-						$iLength = 0;
-						$iNext = $i;
-						while ( $iNext !== null && $this->newText->tokens[$iNext]['link'] === null ) {
-							$iStart = $iNext;
-							$iLength ++;
-							if ( $iStart == $newStart ) {
-								break;
-							}
-							$iNext = $this->newText->tokens[$iNext]['prev'];
-						}
-
-						// Determine the limits of the unresolved old sequence
-						$jStart = null;
-						$jEnd = $j;
-						$jLength = 0;
-						$jNext = $j;
-						while ( $jNext !== null && $this->oldText->tokens[$jNext]['link'] === null ) {
-							$jStart = $jNext;
-							$jLength ++;
-							if ( $jStart == $oldStart ) {
-								break;
-							}
-							$jNext = $this->oldText->tokens[$jNext]['prev'];
-						}
-
-						// Recursively diff the unresolved sequence
-						if ( $iLength > 1 || $jLength > 1 ) {
-
-							// New empty symbols object for sub-region
-							$symbolsRecurse = array(
-								'token' => array(),
-								'hashTable' => array(),
-								'linked' => false
-							);
-							$this->calculateDiff(
-								$symbolsRecurse, $level, false, true,
-								$iStart, $iEnd, $jStart, $jEnd, $recursionLevel + 1
-							);
-						}
-						$i = $iStart;
+						$repeat = false;
+						$dirUp = true;
+						$this->calculateDiff( $level, $recurse, $repeat, $i, $j, $dirUp, $recursionLevel + 1 );
 					}
-
-					// Next list element
-					if ( $i == $newStart ) {
-						break;
-					}
-					$i = $this->newText->tokens[$i]['prev'];
 				}
 			}
 		}
 
 		// Stop timers
-		if ( $this->config['timer'] === true && $repeat === false ) {
+		if ( $this->config['timer'] === true && $repeating === false ) {
 			if ( !isset( $this->recursionTimer[$recursionLevel] ) ) {
 				$this->recursionTimer[$recursionLevel] = 0;
 			}
-			$this->recursionTimer[$recursionLevel] += $this->timeEnd( $level . ( $recursionLevel ), true );
+			$this->recursionTimer[$recursionLevel] += $this->timeEnd(
+				$level . ( $recursionLevel ),
+				true
+			);
 		}
-		if ( $this->config['timer'] === true && $repeat === false && $recursionLevel === 0 ) {
+		if ( $this->config['timer'] === true && $repeating === false && $recursionLevel === 0 ) {
 			$this->timeRecursionEnd( $level );
 			$this->timeEnd( $level );
 		}
@@ -1755,7 +1790,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Main method for processing raw diff data, extracting deleted, inserted, and moved blocks
+	 * Main method for processing raw diff data, extracting deleted, inserted, and moved blocks.
 	 *
 	 * Scheme of blocks, sections, and groups (old block numbers):
 	 *   Old:      1    2 3D4   5E6    7   8 9 10  11
@@ -1854,7 +1889,7 @@ class WikEdDiff extends DifferenceEngine {
 
 		// Debug log
 		if ( $this->config['debug'] === true || $this->config['timer'] === true ) {
-			$this->debug( 'Unlinke count', $unlinkCount );
+			$this->debug( 'Unlink count', $unlinkCount );
 		}
 		if ( $this->config['debug'] === true ) {
 			$this->debugGroups( 'Groups' );
@@ -1864,7 +1899,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Collect identical corresponding matching ('=') blocks from old text and sort by new text
+	 * Collect identical corresponding matching ('=') blocks from old text and sort by new text.
 	 *
 	 * @param[in] WikEdDiffText $newText, $oldText Text objects
 	 * @param[in/out] array $blocks Blocks table object
@@ -1873,7 +1908,7 @@ class WikEdDiff extends DifferenceEngine {
 
 		$blocks = &$this->blocks;
 
-		// Cycle through old text to find matched (linked) blocks
+		// Cycle through old text to find connected (linked, matched) blocks
 		$j = $this->oldText->first;
 		$i = null;
 		while ( $j !== null ) {
@@ -1893,7 +1928,7 @@ class WikEdDiff extends DifferenceEngine {
 				$count = 0;
 				$unique = false;
 				$text = '';
-				while ( $i !== null && $j !== null && $this->oldText->tokens[$j]['link'] == $i ) {
+				while ( $i !== null && $j !== null && $this->oldText->tokens[$j]['link'] === $i ) {
 					$token = $this->oldText->tokens[$j]['token'];
 					$count ++;
 					if ( $this->newText->tokens[$i]['unique'] === true ) {
@@ -1910,7 +1945,7 @@ class WikEdDiff extends DifferenceEngine {
 					'newBlock'  => null,
 					'oldNumber' => $this->oldText->tokens[$jStart]['number'],
 					'newNumber' => $this->newText->tokens[$iStart]['number'],
-					'oldStart' => $jStart,
+					'oldStart'  => $jStart,
 					'count'     => $count,
 					'unique'    => $unique,
 					'words'     => $this->wordCount( $text ),
@@ -1931,7 +1966,7 @@ class WikEdDiff extends DifferenceEngine {
 		} );
 
 		// Number blocks in new text order
-		for ( $block = 0; $block < count( $blocks ); $block ++ ) {
+		for ( $block = 0, $blocksLength = count( $blocks ); $block < $blocksLength; $block ++ ) {
 			$blocks[$block]['newBlock'] = $block;
 		}
 	}
@@ -1939,7 +1974,7 @@ class WikEdDiff extends DifferenceEngine {
 
 	/**
 	 * Collect independent block sections with no block move crosses
-	 *   outside a section for per-section determination of non-moving fixed groups
+	 * outside a section for per-section determination of non-moving fixed groups.
 	 *
 	 * @param[out] array $sections Sections table object
 	 * @param[in/out] array $blocks Blocks table object, section property
@@ -1953,7 +1988,8 @@ class WikEdDiff extends DifferenceEngine {
 		$sections = array();
 
 		// Cycle through blocks
-		for ( $block = 0; $block < count( $blocks ); $block ++ ) {
+		$blocksLength = count( $blocks );
+		for ( $block = 0; $block < $blocksLength; $block ++ ) {
 
 			$sectionStart = $block;
 			$sectionEnd = $block;
@@ -1962,7 +1998,7 @@ class WikEdDiff extends DifferenceEngine {
 			$sectionOldMax = $oldMax;
 
 			// Check right
-			for ( $j = $sectionStart + 1; $j < count( $blocks ); $j ++ ) {
+			for ( $j = $sectionStart + 1; $j < $blocksLength; $j ++ ) {
 
 				// Check for crossing over to the left
 				if ( $blocks[$j]['oldNumber'] > $oldMax ) {
@@ -1993,7 +2029,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Find groups of continuous old text blocks
+	 * Find groups of continuous old text blocks.
 	 *
 	 * @param[out] array $groups Groups table object
 	 * @param[in/out] array $blocks Blocks table object, group property
@@ -2004,7 +2040,8 @@ class WikEdDiff extends DifferenceEngine {
 		$groups = &$this->groups;
 
 		// Cycle through blocks
-		for ( $block = 0; $block < count( $blocks ); $block ++ ) {
+		$blocksLength = count( $blocks );
+		for ( $block = 0; $block < $blocksLength; $block ++ ) {
 			$groupStart = $block;
 			$groupEnd = $block;
 			$oldBlock = $blocks[$groupStart]['oldBlock'];
@@ -2016,10 +2053,10 @@ class WikEdDiff extends DifferenceEngine {
 			$chars = $blocks[$block]['chars'];
 
 			// Check right
-			for ( $i = $groupEnd + 1; $i < count( $blocks ); $i ++ ) {
+			for ( $i = $groupEnd + 1; $i < $blocksLength; $i ++ ) {
 
 				// Check for crossing over to the left
-				if ( $blocks[$i]['oldBlock'] != $oldBlock + 1 ) {
+				if ( $blocks[$i]['oldBlock'] !== $oldBlock + 1 ) {
 					break;
 				}
 				$oldBlock = $blocks[$i]['oldBlock'];
@@ -2071,7 +2108,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Set longest sequence of increasing groups in sections as fixed (not moved)
+	 * Set longest sequence of increasing groups in sections as fixed (not moved).
 	 *
 	 * @param[in] array $sections Sections table object
 	 * @param[in/out] array $groups Groups table object, fixed property
@@ -2084,7 +2121,11 @@ class WikEdDiff extends DifferenceEngine {
 		$sections = &$this->sections;
 
 		// Cycle through sections
-		for ( $section = 0; $section < count( $sections ); $section ++ ) {
+		for (
+			$section = 0, $sectionsLength = count( $sections );
+			$section < $sectionsLength;
+			$section ++
+		) {
 			$blockStart = $sections[$section]['blockStart'];
 			$blockEnd = $sections[$section]['blockEnd'];
 
@@ -2106,12 +2147,16 @@ class WikEdDiff extends DifferenceEngine {
 			}
 
 			// Mark fixed groups
-			for ( $i = 0; $i < count( $maxPath ); $i ++ ) {
+			for ( $i = 0, $maxPathLength = count( $maxPath ); $i < $maxPathLength; $i ++ ) {
 				$group = $maxPath[$i];
 				$groups[$group]['fixed'] = true;
 
 				// Mark fixed blocks
-				for ( $block = $groups[$group]['blockStart']; $block <= $groups[$group]['blockEnd']; $block ++ ) {
+				for (
+					$block = $groups[$group]['blockStart'], $groupBlockEnd = $groups[$group]['blockEnd'];
+					$block <= $groupBlockEnd;
+					$block ++
+				) {
 					$blocks[$block]['fixed'] = true;
 				}
 			}
@@ -2120,7 +2165,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Recusively find path of groups in increasing old group order with longest char length
+	 * Recusively find path of groups in increasing old group order with longest char length.
 	 *
 	 * @param int $start Path start group
 	 * @param int $groupEnd Path last group
@@ -2173,7 +2218,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Collect deletion ('-') blocks from old text
+	 * Collect deletion ('-') blocks from old text.
 	 *
 	 * @param[in] WikEdDiffText $oldText Old Text object
 	 * @param[out] array $blocks Blocks table object
@@ -2182,7 +2227,7 @@ class WikEdDiff extends DifferenceEngine {
 
 		$blocks = &$this->blocks;
 
-		// Cycle through old text to find matched (linked) blocks
+		// Cycle through old text to find connected (linked, matched) blocks
 		$j = $this->oldText->first;
 		$i = null;
 		while ( $j !== null ) {
@@ -2221,7 +2266,7 @@ class WikEdDiff extends DifferenceEngine {
 			// Skip '=' blocks
 			if ( $j !== null ) {
 				$i = $this->oldText->tokens[$j]['link'];
-				while ( $i !== null && $j !== null && $this->oldText->tokens[$j]['link'] == $i ) {
+				while ( $i !== null && $j !== null && $this->oldText->tokens[$j]['link'] === $i ) {
 					$i = $this->newText->tokens[$i]['next'];
 					$j = $this->oldText->tokens[$j]['next'];
 				}
@@ -2231,15 +2276,16 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Position deletion '-' blocks into new text order
+	 * Position deletion '-' blocks into new text order.
 	 * Deletion blocks move with fixed reference:
 	 *   Old:          1 D 2      1 D 2
 	 *                /     \    /   \ \
 	 *   New:        1 D     2  1     D 2
 	 *   Fixed:      *                  *
 	 *   newNumber:  1 1              2 2
+	 *
 	 * Marks '|' and deletions '-' get newNumber of reference block
-	 *   and are sorted around it by old text number
+	 * and are sorted around it by old text number.
 	 *
 	 * @param[in/out] array $blocks Blocks table, newNumber, section, group, and fixed properties
 	 *
@@ -2251,7 +2297,7 @@ class WikEdDiff extends DifferenceEngine {
 
 		// Sort shallow copy of blocks by oldNumber
 		$blocksOld = array();
-		for ( $block = 0; $block < count( $blocks ); $block ++ ) {
+		for ( $block = 0, $blocksLength = count( $blocks ); $block < $blocksLength; $block ++ ) {
 			$blocksOld[$block] = &$blocks[$block];
 		}
 
@@ -2260,15 +2306,20 @@ class WikEdDiff extends DifferenceEngine {
 		} );
 
 		// Cycle through blocks in old text order
-		for ( $block = 0; $block < count( $blocksOld ); $block ++ ) {
+		for (
+			$block = 0, $blocksOldLength = count( $blocksOld );
+			$block < $blocksOldLength;
+			$block ++
+		) {
 			$delBlock = &$blocksOld[$block];
 
 			// '-' block only
-			if ( $delBlock['type'] != '-' ) {
+			if ( $delBlock['type'] !== '-' ) {
 				continue;
 			}
 
-			// Find fixed '=' reference block from original block position to position '-' block, similar to position '|' code
+			// Find fixed '=' reference block from original block position to position '-' block
+			// Similar to position marks '|' code
 
 			// Get old text prev block
 			$prevBlockNumber = null;
@@ -2288,20 +2339,20 @@ class WikEdDiff extends DifferenceEngine {
 
 			// Move after prev block if fixed
 			$refBlock = null;
-			if ( $prevBlock !== null && $prevBlock['type'] == '=' && $prevBlock['fixed'] === true ) {
+			if ( $prevBlock !== null && $prevBlock['type'] === '=' && $prevBlock['fixed'] === true ) {
 				$refBlock = $prevBlock;
 			}
 
 			// Move before next block if fixed
-			elseif ( $nextBlock !== null && $nextBlock['type'] == '=' && $nextBlock['fixed'] === true ) {
+			elseif ( $nextBlock !== null && $nextBlock['type'] === '=' && $nextBlock['fixed'] === true ) {
 				$refBlock = $nextBlock;
 			}
 
 			// Move after prev block if not start of group
 			elseif (
 				$prevBlock !== null &&
-				$prevBlock['type'] == '=' &&
-				$prevBlockNumber != $groups[ $prevBlock['group'] ]['blockEnd']
+				$prevBlock['type'] === '=' &&
+				$prevBlockNumber !== $groups[ $prevBlock['group'] ]['blockEnd']
 			) {
 				$refBlock = $prevBlock;
 			}
@@ -2309,8 +2360,8 @@ class WikEdDiff extends DifferenceEngine {
 			// Move before next block if not start of group
 			elseif (
 				$nextBlock !== null &&
-				$nextBlock['type'] == '=' &&
-				$nextBlockNumber != $groups[ $nextBlock['group'] ]['blockStart']
+				$nextBlock['type'] === '=' &&
+				$nextBlockNumber !== $groups[ $nextBlock['group'] ]['blockStart']
 			) {
 				$refBlock = $nextBlock;
 			}
@@ -2318,7 +2369,7 @@ class WikEdDiff extends DifferenceEngine {
 			// Move after closest previous fixed block
 			else {
 				for ( $fixed = $block; $fixed >= 0; $fixed -- ) {
-					if ( $blocksOld[$fixed]['type'] == '=' && $blocksOld[$fixed]['fixed'] === true ) {
+					if ( $blocksOld[$fixed]['type'] === '=' && $blocksOld[$fixed]['fixed'] === true ) {
 						$refBlock = $blocksOld[$fixed];
 						break;
 					}
@@ -2346,8 +2397,8 @@ class WikEdDiff extends DifferenceEngine {
 
 	/**
 	 * Convert matching '=' blocks in groups into insertion/deletion ('+'/'-') pairs
-	 *   if too short and too common
-	 * Prevents fragmentated diffs for very different versions
+	 * if too short and too common.
+	 * Prevents fragmentated diffs for very different versions.
 	 *
 	 * @param[in] array $blocks Blocks table object
 	 * @param[in/out] WikEdDiffText $newText, $oldText Text object, linked property
@@ -2361,7 +2412,7 @@ class WikEdDiff extends DifferenceEngine {
 
 		// Cycle through groups
 		$unlinked = false;
-		for ( $group = 0; $group < count( $groups ); $group ++ ) {
+		for ( $group = 0, $groupsLength = count( $groups ); $group < $groupsLength; $group ++ ) {
 			$blockStart = $groups[$group]['blockStart'];
 			$blockEnd = $groups[$group]['blockEnd'];
 
@@ -2371,7 +2422,7 @@ class WikEdDiff extends DifferenceEngine {
 				$groups[$group]['unique'] === false
 			) {
 				for ( $block = $blockStart; $block <= $blockEnd; $block ++ ) {
-					if ( $blocks[$block]['type'] == '=' ) {
+					if ( $blocks[$block]['type'] === '=' ) {
 						$this->unlinkSingleBlock( $blocks[$block] );
 						$unlinked = true;
 					}
@@ -2383,7 +2434,7 @@ class WikEdDiff extends DifferenceEngine {
 
 				// Unlink blocks from start
 				for ( $block = $blockStart; $block <= $blockEnd; $block ++ ) {
-					if ( $blocks[$block]['type'] == '=' ) {
+					if ( $blocks[$block]['type'] === '=' ) {
 
 						// Stop unlinking if more than one word or a unique word
 						if ( $blocks[$block]['words'] > 1 || $blocks[$block]['unique'] === true ) {
@@ -2397,12 +2448,12 @@ class WikEdDiff extends DifferenceEngine {
 
 				// Unlink blocks from end
 				for ( $block = $blockEnd; $block > $blockStart; $block -- ) {
-					if ( $blocks[$block]['type'] == '=' ) {
+					if ( $blocks[$block]['type'] === '=' ) {
 
 						// Stop unlinking if more than one word or a unique word
 						if (
 							$blocks[$block]['words'] > 1 || (
-								$blocks[$block]['words'] == 1 && $blocks[$block]['unique'] === true
+								$blocks[$block]['words'] === 1 && $blocks[$block]['unique'] === true
 							)
 						) {
 							break;
@@ -2418,7 +2469,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Unlink text tokens of single block, convert them into into insertion/deletion ('+'/'-') pairs
+	 * Unlink text tokens of single block, convert them into into insertion/deletion ('+'/'-') pairs.
 	 *
 	 * @param[in] array $blocks Blocks table object
 	 * @param[out] WikEdDiffText $newText, $oldText Text objects, link property
@@ -2427,7 +2478,7 @@ class WikEdDiff extends DifferenceEngine {
 
 		// Cycle through old text
 		$j = $block['oldStart'];
-		for ( $count = 0; $count < $block['count']; $count ++ ) {
+		for ( $count = 0, $blockCount = $block['count']; $count < $blockCount; $count ++ ) {
 
 			// Unlink tokens
 			$this->newText->tokens[ $this->oldText->tokens[$j]['link'] ]['link'] = null;
@@ -2438,7 +2489,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Collect insertion ('+') blocks from new text
+	 * Collect insertion ('+') blocks from new text.
 	 *
 	 * @param[in] WikEdDiffText $newText New Text object
 	 * @param[out] array $blocks Blocks table object
@@ -2494,7 +2545,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Sort blocks by new text token number and update groups
+	 * Sort blocks by new text token number and update groups.
 	 *
 	 * @param[in/out] array $groups Groups table object
 	 * @param[in/out] array $blocks Blocks table object
@@ -2515,7 +2566,7 @@ class WikEdDiff extends DifferenceEngine {
 
 		// Cycle through blocks and update groups with new block numbers
 		$group = null;
-		for ( $block = 0; $block < count( $blocks ); $block ++ ) {
+		for ( $block = 0, $blocksLength = count( $blocks ); $block < $blocksLength; $block ++ ) {
 			$blockGroup = $blocks[$block]['group'];
 			if ( $blockGroup !== null ) {
 				if ( $blockGroup !== $group ) {
@@ -2530,7 +2581,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Set group numbers of insertion '+' blocks
+	 * Set group numbers of insertion '+' blocks.
 	 *
 	 * @param[in/out] array $groups Groups table object
 	 * @param[in/out] array $blocks Blocks table object, fixed and group properties
@@ -2541,9 +2592,13 @@ class WikEdDiff extends DifferenceEngine {
 		$groups = &$this->groups;
 
 		// Set group numbers of '+' blocks inside existing groups
-		for ( $group = 0; $group < count( $groups ); $group ++ ) {
+		for ( $group = 0, $groupsLength = count( $groups ); $group < $groupsLength; $group ++ ) {
 			$fixed = $groups[$group]['fixed'];
-			for ( $block = $groups[$group]['blockStart']; $block <= $groups[$group]['blockEnd']; $block ++ ) {
+			for (
+				$block = $groups[$group]['blockStart'], $groupBlockEnd = $groups[$group]['blockEnd'];
+				$block <= $groupBlockEnd;
+				$block ++
+			) {
 				if ( $blocks[$block]['group'] === null ) {
 					$blocks[$block]['group'] = $group;
 					$blocks[$block]['fixed'] = $fixed;
@@ -2554,7 +2609,7 @@ class WikEdDiff extends DifferenceEngine {
 		// Add remaining '+' blocks to new groups
 
 		// Cycle through blocks
-		for ( $block = 0; $block < count( $blocks ); $block ++ ) {
+		for ( $block = 0, $blocksLength = count( $blocks ); $block < $blocksLength; $block ++ ) {
 
 			// Skip existing groups
 			if ( $blocks[$block]['group'] === null ) {
@@ -2579,7 +2634,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Mark original positions of moved groups
+	 * Mark original positions of moved groups.
 	 * Scheme: moved block marks at original positions relative to fixed groups:
 	 *   Groups:    3       7
 	 *           1 <|       |     (no next smaller fixed)
@@ -2589,10 +2644,12 @@ class WikEdDiff extends DifferenceEngine {
 	 *              |      >|   5
 	 *              |       |>  9 (no next larger fixed)
 	 *   Fixed:     *       *
+	 *
 	 * Mark direction: $groups[$movedGroup]['blockStart'] < $groups[$group]['blockStart']
 	 * Group side:     $groups[$movedGroup]['oldNumber']  < $groups[$group]['oldNumber']
+	 *
 	 * Marks '|' and deletions '-' get newNumber of reference block
-	 *   and are sorted around it by old text number
+	 * and are sorted around it by old text number.
 	 *
 	 * @param[in/out] array $groups Groups table object, movedFrom property
 	 * @param[in/out] array $blocks Blocks table object
@@ -2608,7 +2665,7 @@ class WikEdDiff extends DifferenceEngine {
 		$blocksOld = $blocks;
 
 		// Enumerate copy
-		for ( $i = 0; $i < count( $blocksOld ); $i ++ ) {
+		for ( $i = 0, $blocksOldLength = count( $blocksOld ); $i < $blocksOldLength; $i ++ ) {
 			$blocksOld[$i]['number'] = $i;
 		}
 
@@ -2623,19 +2680,20 @@ class WikEdDiff extends DifferenceEngine {
 
 		// Create lookup table: original to sorted
 		$lookupSorted = array();
-		for ( $i = 0; $i < count( $blocksOld ); $i ++ ) {
+		for ( $i = 0, $blocksOldLength = count( $blocksOld ); $i < $blocksOldLength; $i ++ ) {
 			$lookupSorted[ $blocksOld[$i]['number'] ] = $i;
 		}
 
 		// Cycle through groups (moved group)
-		for ( $moved = 0; $moved < count( $groups ); $moved ++ ) {
+		for ( $moved = 0, $groupsLength = count( $groups ); $moved < $groupsLength; $moved ++ ) {
 			$movedGroup = &$groups[$moved];
 			if ( $movedGroup['fixed'] !== false ) {
 				continue;
 			}
 			$movedOldNumber = $movedGroup['oldNumber'];
 
-			// Find fixed '=' reference block from original block position to position '|' block, similar to position '-' code
+			// Find fixed '=' reference block from original block position to position '|' block
+			// Similar to position deletions '-' code
 
 			// Get old text prev block
 			$prevBlock = null;
@@ -2653,19 +2711,19 @@ class WikEdDiff extends DifferenceEngine {
 
 			// Move after prev block if fixed
 			$refBlock = null;
-			if ( $prevBlock !== null && $prevBlock['type'] == '=' && $prevBlock['fixed'] === true ) {
+			if ( $prevBlock !== null && $prevBlock['type'] === '=' && $prevBlock['fixed'] === true ) {
 				$refBlock = $prevBlock;
 			}
 
 			// Move before next block if fixed
-			elseif ( $nextBlock !== null && $nextBlock['type'] == '=' && $nextBlock['fixed'] === true ) {
+			elseif ( $nextBlock !== null && $nextBlock['type'] === '=' && $nextBlock['fixed'] === true ) {
 				$refBlock = $nextBlock;
 			}
 
 			// Find closest fixed block to the left
 			else {
 				for ( $fixed = $lookupSorted[ $movedGroup['blockStart'] ] - 1; $fixed >= 0; $fixed -- ) {
-					if ( $blocksOld[$fixed]['type'] == '=' && $blocksOld[$fixed]['fixed'] === true ) {
+					if ( $blocksOld[$fixed]['type'] === '=' && $blocksOld[$fixed]['fixed'] === true ) {
 						$refBlock = $blocksOld[$fixed];
 						break;
 					}
@@ -2729,7 +2787,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Collect diff fragment list for markup, create abstraction layer for customized diffs
+	 * Collect diff fragment list for markup, create abstraction layer for customized diffs.
 	 * Adds the following fagment types:
 	 *   '=', '-', '+'   same, deletion, insertion
 	 *   '<', '>'        mark left, mark right
@@ -2755,7 +2813,11 @@ class WikEdDiff extends DifferenceEngine {
 
 		// Cycle through groups
 		$htmlFragments = array();
-		for ( $group = 0; $group < count( $groupsSort ); $group ++ ) {
+		for (
+			$group = 0, $groupsSortLength = count( $groupsSort );
+			$group < $groupsSortLength;
+			$group ++
+		) {
 			$blockStart = $groupsSort[$group]['blockStart'];
 			$blockEnd = $groupsSort[$group]['blockEnd'];
 
@@ -2779,7 +2841,7 @@ class WikEdDiff extends DifferenceEngine {
 				$type = $blocks[$block]['type'];
 
 				// Add '=' unchanged text and moved block
-				if ( $type == '=' || $type == '-' || $type == '+' ) {
+				if ( $type === '=' || $type === '-' || $type === '+' ) {
 					array_push( $fragments, array(
 						'text'  => $blocks[$block]['text'],
 						'type'  => $type,
@@ -2788,13 +2850,17 @@ class WikEdDiff extends DifferenceEngine {
 				}
 
 				// Add '<' and '>' marks
-				elseif ( $type == '|' ) {
+				elseif ( $type === '|' ) {
 					$movedGroup = $groups[ $blocks[$block]['moved'] ];
 
 					// Get mark text
 					$markText = '';
-					for ( $movedBlock = $movedGroup['blockStart']; $movedBlock <= $movedGroup['blockEnd']; $movedBlock ++ ) {
-						if ( $blocks[$movedBlock]['type'] == '=' || $blocks[$movedBlock]['type'] == '-' ) {
+					for (
+						$movedBlock = $movedGroup['blockStart'], $movedGroupBlockEnd = $movedGroup['blockEnd'];
+						$movedBlock <= $movedGroupBlockEnd;
+						$movedBlock ++
+					) {
+						if ( $blocks[$movedBlock]['type'] === '=' || $blocks[$movedBlock]['type'] === '-' ) {
 							$markText .= $blocks[$movedBlock]['text'];
 						}
 					}
@@ -2830,8 +2896,8 @@ class WikEdDiff extends DifferenceEngine {
 
 			// Check if joinable
 			if (
-				$fragments[$fragment]['type'] == $fragments[$fragment - 1]['type'] &&
-				$fragments[$fragment]['color'] == $fragments[$fragment - 1]['color'] &&
+				$fragments[$fragment]['type'] === $fragments[$fragment - 1]['type'] &&
+				$fragments[$fragment]['color'] === $fragments[$fragment - 1]['color'] &&
 				$fragments[$fragment]['text'] !== '' && $fragments[$fragment - 1]['text'] !== ''
 			) {
 
@@ -2853,7 +2919,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Clip unchanged sections from unmoved block text
+	 * Clip unchanged sections from unmoved block text.
 	 * Adds the following fagment types:
 	 *   '~', ' ~', '~ ' omission indicators
 	 *   '[', ']', ','   fragment start and end, fragment separator
@@ -2865,7 +2931,7 @@ class WikEdDiff extends DifferenceEngine {
 		$fragments = &$this->fragments;
 
 		// Skip if only one fragment in containers, no change
-		if ( count( $fragments ) == 5 ) {
+		if ( count( $fragments ) === 5 ) {
 			return;
 		}
 
@@ -2900,7 +2966,11 @@ class WikEdDiff extends DifferenceEngine {
 		}
 
 		// Cycle through fragments
-		for ( $fragment = 0; $fragment < count( $fragments ); $fragment ++ ) {
+		for (
+			$fragment = 0, $fragmentsLength = count( $fragments );
+			$fragment < $fragmentsLength;
+			$fragment ++
+		) {
 
 			// Skip if not an unmoved and unchanged block
 			$type = $fragments[$fragment]['type'];
@@ -2911,6 +2981,7 @@ class WikEdDiff extends DifferenceEngine {
 
 			// Skip if too short for clipping
 			$text = $fragments[$fragment]['text'];
+			$textLength = strlen( $text );
 			if ( mb_strlen( $text ) < $minRight && mb_strlen( $text ) < $minLeft ) {
 				continue;
 			}
@@ -2918,46 +2989,56 @@ class WikEdDiff extends DifferenceEngine {
 			// Get line positions including start and end
 			$lines = array();
 			$lastIndex = null;
-			preg_match_all( $this->config['regExp']['clipLine'], $text, $regExpMatch, PREG_OFFSET_CAPTURE );
-			for ( $i = 0; $i < count( $regExpMatch[0] ); $i ++ ) {
+			preg_match_all(
+				$this->config['regExp']['clipLine'],
+				$text,
+				$regExpMatch,
+				PREG_OFFSET_CAPTURE
+			);
+			for ( $i = 0, $matchLength = count( $regExpMatch[0] ); $i < $matchLength; $i ++ ) {
 				array_push( $lines, $regExpMatch[0][$i][1] );
 				$lastIndex = $regExpMatch[0][$i][1] + strlen( $regExpMatch[0][$i][0] );
 			}
 			if ( !isset( $lines[0] ) || $lines[0] !== 0 ) {
 				array_unshift( $lines, 0 );
 			}
-			if ( $lastIndex !== strlen( $text ) ) {
-				array_push( $lines, strlen( $text ) );
+			if ( $lastIndex !== $textLength ) {
+				array_push( $lines, $textLength );
 			}
-// $this->debug( '$text', $text);
-// $this->debug( 'strlen( $text )', strlen( $text ) );
-// $this->debug( '$lines', $lines);
 
 			// Get heading positions
 			$headings = array();
 			$headingsEnd = array();
-			preg_match_all( $this->config['regExp']['clipHeading'], $text, $regExpMatch, PREG_OFFSET_CAPTURE );
-			for ( $i = 0; $i < count( $regExpMatch[0] ); $i ++ ) {
+			preg_match_all(
+				$this->config['regExp']['clipHeading'],
+				$text,
+				$regExpMatch,
+				PREG_OFFSET_CAPTURE
+			);
+			for ( $i = 0, $matchLength = count( $regExpMatch[0] ); $i < $matchLength; $i ++ ) {
 				array_push( $headings, $regExpMatch[0][$i][1] );
 				array_push( $headingsEnd, $regExpMatch[0][$i][1] + strlen( $regExpMatch[0][$i][0] ) );
 			}
-// $this->debug( '$headings', $headings);
 
 			// Get paragraph positions including start and end
 			$paragraphs = array();
 			$lastIndex = null;
-			preg_match_all( $this->config['regExp']['clipParagraph'], $text, $regExpMatch, PREG_OFFSET_CAPTURE );
-			for ( $i = 0; $i < count( $regExpMatch[0] ); $i ++ ) {
+			preg_match_all(
+				$this->config['regExp']['clipParagraph'],
+				$text,
+				$regExpMatch,
+				PREG_OFFSET_CAPTURE
+			);
+			for ( $i = 0, $matchLength = count( $regExpMatch[0] ); $i < $matchLength; $i ++ ) {
 				array_push( $paragraphs, $regExpMatch[0][$i][1] );
 				$lastIndex = $regExpMatch[0][$i][1] + strlen( $regExpMatch[0][$i][0] );
 			}
 			if ( !isset( $paragraphs[0] ) || $paragraphs[0] !== 0 ) {
 				array_unshift( $paragraphs, 0 );
 			}
-			if ( $lastIndex !== strlen( $text ) ) {
-				array_push( $paragraphs, strlen( $text ) );
+			if ( $lastIndex !== $textLength ) {
+				array_push( $paragraphs, $textLength );
 			}
-// $this->debug( '$paragraphs', $paragraphs);
 
 			// Determine ranges to keep on left and right side
 			$rangeRight = null;
@@ -2966,18 +3047,21 @@ class WikEdDiff extends DifferenceEngine {
 			$rangeLeftType = '';
 
 			// Find clip pos from left, skip for first non-container block
-			if ( $fragment != 2 ) {
+			if ( $fragment !== 2 ) {
 
 				// Maximum lines to search from left
-				$rangeLeftMax = strlen( $text );
+				$rangeLeftMax = $textLength;
 				if ( $this->config['clipLinesLeftMax'] < count( $lines ) ) {
 					$rangeLeftMax = $lines[$this->config['clipLinesLeftMax']];
 				}
 
 				// Find first heading from left
 				if ( $rangeLeft === null ) {
-					for ( $j = 0; $j < count( $headingsEnd ); $j ++ ) {
-						if ( $headingsEnd[$j] > $this->config['clipHeadingLeft'] || $headingsEnd[$j] > $rangeLeftMax ) {
+					for ( $j = 0, $headingsLength = count( $headingsEnd ); $j < $headingsLength; $j ++ ) {
+						if (
+							$headingsEnd[$j] > $this->config['clipHeadingLeft'] ||
+							$headingsEnd[$j] > $rangeLeftMax
+						) {
 							break;
 						}
 						$rangeLeft = $headingsEnd[$j];
@@ -2988,11 +3072,17 @@ class WikEdDiff extends DifferenceEngine {
 
 				// Find first paragraph from left
 				if ( $rangeLeft === null ) {
-					for ( $j = 0; $j < count( $paragraphs ); $j ++ ) {
-						if ( $paragraphs[$j] > $this->config['clipParagraphLeftMax'] || $paragraphs[$j] > $rangeLeftMax ) {
+					$max = strlen( mb_substr( $text, 0, $this->config['clipParagraphLeftMax'] ) );
+					for (
+						$j = 0, $paragraphsLength = $j < count( $paragraphs );
+						$j < $paragraphsLength;
+						$j ++
+					) {
+						if ( $paragraphs[$j] > $max || $paragraphs[$j] > $rangeLeftMax ) {
 							break;
 						}
-						if ( $paragraphs[$j] > $this->config['clipParagraphLeftMin'] ) {
+						$min = strlen( mb_substr( $text, 0, $this->config['clipParagraphLeftMin'] ) );
+						if ( $paragraphs[$j] > $min ) {
 							$rangeLeft = $paragraphs[$j];
 							$rangeLeftType = 'paragraph';
 							break;
@@ -3002,11 +3092,13 @@ class WikEdDiff extends DifferenceEngine {
 
 				// Find first line break from left
 				if ( $rangeLeft === null ) {
-					for ( $j = 0; $j < count( $lines ); $j ++ ) {
-						if ( $lines[$j] > $this->config['clipLineLeftMax'] || $lines[$j] > $rangeLeftMax ) {
+					$max = strlen( mb_substr( $text, 0, $this->config['clipLineLeftMax'] ) );
+					for ( $j = 0, $linesLength = count( $lines ); $j < $linesLength; $j ++ ) {
+						if ( $lines[$j] > $max || $lines[$j] > $rangeLeftMax ) {
 							break;
 						}
-						if ( $lines[$j] > $this->config['clipLineLeftMin'] ) {
+						$min = strlen( mb_substr( $text, 0, $this->config['clipLineLeftMin'] ) );
+						if ( $lines[$j] > $min ) {
 							$rangeLeft = $lines[$j];
 							$rangeLeftType = 'line';
 							break;
@@ -3014,10 +3106,18 @@ class WikEdDiff extends DifferenceEngine {
 					}
 				}
 
-				// Find blank from left
+				// Find first blank from left
 				if ( $rangeLeft === null ) {
-					if ( preg_match( $this->config['regExp']['clipBlank'], $text, $regExpMatch, PREG_OFFSET_CAPTURE, $this->config['clipBlankLeftMin'] ) === 1 ) {
-						if ( $regExpMatch[0][1] < $this->config['clipBlankLeftMax'] && $regExpMatch[0][1] < $rangeLeftMax ) {
+					$min = strlen( mb_substr( $text, 0, $this->config['clipBlankLeftMin'] ) );
+					if ( preg_match(
+						$this->config['regExp']['clipBlank'],
+						$text,
+						$regExpMatch,
+						PREG_OFFSET_CAPTURE,
+						$min
+					) === 1	) {
+						$max = strlen( mb_substr( $text, 0, $this->config['clipBlankLeftMax'] ) );
+						if ( $regExpMatch[0][1] < $max && $regExpMatch[0][1] < $rangeLeftMax ) {
 							$rangeLeft = $regExpMatch[0][1];
 							$rangeLeftType = 'blank';
 						}
@@ -3026,10 +3126,11 @@ class WikEdDiff extends DifferenceEngine {
 
 				// Fixed number of chars from left
 				if ( $rangeLeft === null ) {
-					if ( $this->config['clipCharsLeft'] < $rangeLeftMax ) {
+					$max = strlen( mb_substr( $text, 0, $this->config['clipCharsLeft'] ) );
+					if ( $max < $rangeLeftMax ) {
 
 						// Get byte length from UniCode length
-						$rangeLeft = strlen( mb_substr( $text, 0, $this->config['clipCharsLeft'] ) );
+						$rangeLeft = $max;
 						$rangeLeftType = 'chars';
 					}
 				}
@@ -3042,19 +3143,20 @@ class WikEdDiff extends DifferenceEngine {
 			}
 
 			// Find clip pos from right, skip for last non-container block
-			if ( $fragment != count( $fragments ) - 3 ) {
+			if ( $fragment !== count( $fragments ) - 3 ) {
 
 				// Maximum lines to search from right
 				$rangeRightMin = 0;
 				if ( count( $lines ) >= $this->config['clipLinesRightMax'] ) {
-					$rangeRightMin = $lines[count( $lines ) - $this->config['clipLinesRightMax']];
+					$rangeRightMin = $lines[ count( $lines ) - $this->config['clipLinesRightMax'] ];
 				}
 
 				// Find last heading from right
 				if ( $rangeRight === null ) {
+					$max = strlen( mb_substr( $text, 0, $this->config['clipHeadingRight'] ) );
 					for ( $j = count( $headings ) - 1; $j >= 0; $j -- ) {
 						if (
-							$headings[$j] < strlen( $text ) - $this->config['clipHeadingRight'] ||
+							$headings[$j] < $textLength - $max ||
 							$headings[$j] < $rangeRightMin
 						) {
 							break;
@@ -3067,14 +3169,15 @@ class WikEdDiff extends DifferenceEngine {
 
 				// Find last paragraph from right
 				if ( $rangeRight === null ) {
+					$max = strlen( mb_substr( $text, 0, $this->config['clipParagraphRightMax'] ) );
 					for ( $j = count( $paragraphs ) - 1; $j >= 0 ; $j -- ) {
 						if (
-							$paragraphs[$j] < strlen( $text ) - $this->config['clipParagraphRightMax'] ||
-							$paragraphs[$j] < $rangeRightMin
+							$paragraphs[$j] < $textLength - $max || $paragraphs[$j] < $rangeRightMin
 						) {
 							break;
 						}
-						if ( $paragraphs[$j] < strlen( $text ) - $this->config['clipParagraphRightMin'] ) {
+						$min = strlen( mb_substr( $text, 0, $this->config['clipParagraphRightMin'] ) );
+						if ( $paragraphs[$j] < $textLength - $min ) {
 							$rangeRight = $paragraphs[$j];
 							$rangeRightType = 'paragraph';
 							break;
@@ -3084,14 +3187,20 @@ class WikEdDiff extends DifferenceEngine {
 
 				// Find last line break from right
 				if ( $rangeRight === null ) {
+					$max = strlen(
+						mb_substr( $text, mb_strlen( $text ) - $this->config['clipLineRightMax'] )
+					);
 					for ( $j = count( $lines ) - 1; $j >= 0; $j -- ) {
 						if (
-							$lines[$j] < strlen( $text ) - $this->config['clipLineRightMax'] ||
+							$lines[$j] < $textLength - $max ||
 							$lines[$j] < $rangeRightMin
 						) {
 							break;
 						}
-						if ( $lines[$j] < strlen( $text ) - $this->config['clipLineRightMin'] ) {
+						$min = strlen(
+							mb_substr( $text, mb_strlen( $text ) - $this->config['clipLineRightMin'] )
+						);
+						if ( $lines[$j] < $textLength - $min ) {
 							$rangeRight = $lines[$j];
 							$rangeRightType = 'line';
 							break;
@@ -3101,29 +3210,42 @@ class WikEdDiff extends DifferenceEngine {
 
 				// Find last blank from right
 				if ( $rangeRight === null ) {
-					$startPos = strlen( $text ) - $this->config['clipBlankRightMax'];
+					$max = strlen(
+						mb_substr( $text, mb_strlen( $text ) - $this->config['clipBlankRightMax'] )
+					);
+					$startPos = $textLength - $max;
 					if ( $startPos < $rangeRightMin ) {
 						$startPos = $rangeRightMin;
 					}
-					$lastPos = $startPos;
-					while ( preg_match( $this->config['regExp']['clipBlank'], $text, $regExpMatch, PREG_OFFSET_CAPTURE, $lastPos ) === 1 ) {
-						if ( $regExpMatch[0][1] > strlen( $text ) - $this->config['clipBlankRightMin'] ) {
+					$lastPos = null;
+					while ( preg_match(
+						$this->config['regExp']['clipBlank'],
+						$text,
+						$regExpMatch,
+						PREG_OFFSET_CAPTURE,
+						$startPos
+					) === 1 ) {
+						$min = strlen(
+							mb_substr( $text, mb_strlen( $text ) - $this->config['clipBlankRightMin'] )
+						);
+						if ( $regExpMatch[0][1] > $textLength - $min ) {
 							if ( $lastPos !== null ) {
 								$rangeRight = $lastPos;
 								$rangeRightType = 'blank';
 							}
 							break;
 						}
-						$lastPos = $regExpMatch[0][1] + strlen( $regExpMatch[0][0] );
+						$startPos = $regExpMatch[0][1] + strlen( $regExpMatch[0][0] );
 					}
 				}
 
 				// Fixed number of chars from right
 				if ( $rangeRight === null ) {
-					if ( strlen( $text ) - $this->config['clipCharsRight'] > $rangeRightMin ) {
+					$max = strlen( mb_substr( $text, mb_strlen( $text ) - $this->config['clipCharsRight'] ) );
+					if ( $max > $rangeRightMin ) {
 
 						// Get byte length from UniCode length
-						$rangeRight = strlen( mb_substr( $text, mb_strlen( $text ) - $this->config['clipCharsRight'] ) );
+						$rangeRight = $max;
 						$rangeRightType = 'chars';
 					}
 				}
@@ -3151,7 +3273,7 @@ class WikEdDiff extends DifferenceEngine {
 
 				// Skip if lines too close
 				$skipLines = 0;
-				for ( $j = 0; $j < count( $lines ); $j ++ ) {
+				for ( $j = 0, $linesLength = count( $lines ); $j < $linesLength; $j ++ ) {
 					if ( $lines[$j] > $rangeRight || $skipLines > $this->config['clipSkipLines'] ) {
 						break;
 					}
@@ -3179,31 +3301,35 @@ class WikEdDiff extends DifferenceEngine {
 				$textLeft = preg_replace( $this->config['regExp']['clipTrimNewLinesLeft'], '', $textLeft );
 
 				// Get omission indicators, remove trailing blanks
-				if ( $rangeLeftType == 'chars' ) {
+				if ( $rangeLeftType === 'chars' ) {
 					$omittedLeft = '~';
 					$textLeft = preg_replace( $this->config['regExp']['clipTrimBlanksLeft'], '', $textLeft );
-				} elseif ( $rangeLeftType == 'blank' ) {
+				} elseif ( $rangeLeftType === 'blank' ) {
 					$omittedLeft = ' ~';
 					$textLeft = preg_replace( $this->config['regExp']['clipTrimBlanksLeft'], '', $textLeft );
 				}
 			}
 
-			// Split right text,
+
+			// Split right text
 			$textRight = null;
 			$omittedRight = null;
 			if ( $rangeRight !== null ) {
-				$textRight = substr( $text, strlen( $text ) - $rangeRight );
+				$textRight = substr( $text, $rangeRight, $textLength - $rangeRight );
 
 				// Remove leading empty lines
-				$textRight = preg_replace( $this->config['regExp']['clipTrimNewLinesRight'], '', $textRight );
+				$textRight =
+					preg_replace( $this->config['regExp']['clipTrimNewLinesRight'], '', $textRight );
 
 				// Get omission indicators, remove leading blanks
-				if ( $rangeRightType == 'chars' ) {
+				if ( $rangeRightType === 'chars' ) {
 					$omittedRight = '~';
-					$textRight = preg_replace( $this->config['regExp']['clipTrimBlanksRight'], '', $textRight );
-				} elseif ( $rangeRightType == 'blank' ) {
+					$textRight =
+						preg_replace( $this->config['regExp']['clipTrimBlanksRight'], '', $textRight );
+				} elseif ( $rangeRightType === 'blank' ) {
 					$omittedRight = '~ ';
-					$textRight = preg_replace( $this->config['regExp']['clipTrimBlanksRight'], '', $textRight );
+					$textRight =
+						preg_replace( $this->config['regExp']['clipTrimBlanksRight'], '', $textRight );
 				}
 			}
 
@@ -3212,25 +3338,50 @@ class WikEdDiff extends DifferenceEngine {
 
 			// Add left text to fragments list
 			if ( $rangeLeft !== null ) {
-				array_splice( $fragments, $fragment ++, 0, array( array( 'text' => $textLeft, 'type' => '=', 'color' => null ) ) );
+				array_splice(
+					$fragments, $fragment ++, 0,
+					array( array( 'text' => $textLeft, 'type' => '=', 'color' => null ) )
+				);
 				if ( $omittedLeft !== null ) {
-					array_splice( $fragments, $fragment ++, 0, array( array( 'text' => '', 'type' => $omittedLeft, 'color' => null ) ) );
+					array_splice(
+						$fragments, $fragment ++, 0,
+						array( array( 'text' => '', 'type' => $omittedLeft, 'color' => null ) )
+					);
 				}
 			}
 
 			// Add fragment container and separator to list
 			if ( $rangeLeft !== null && $rangeRight !== null ) {
-				array_splice( $fragments, $fragment ++, 0, array( array( 'text' => '', 'type' => ']', 'color' => null ) ) );
-				array_splice( $fragments, $fragment ++, 0, array( array( 'text' => '', 'type' => ',', 'color' => null ) ) );
-				array_splice( $fragments, $fragment ++, 0, array( array( 'text' => '', 'type' => '[', 'color' => null ) ) );
+				array_splice(
+					$fragments, $fragment ++, 0,
+					array( array( 'text' => '', 'type' => ']', 'color' => null ) )
+				);
+				array_splice(
+					$fragments, $fragment ++, 0,
+					array( array( 'text' => '', 'type' => ',', 'color' => null ) )
+				);
+				array_splice(
+					$fragments, $fragment ++, 0,
+					array( array( 'text' => '', 'type' => '[', 'color' => null ) )
+				);
 			}
 
 			// Add right text to fragments list
 			if ( $rangeRight !== null ) {
 				if ( $omittedRight !== null ) {
-					array_splice( $fragments, $fragment ++, 0, array( array( 'text' => '', 'type' => $omittedRight, 'color' => null ) ) );
+					array_splice(
+						$fragments,
+						$fragment ++,
+						0,
+						array( array( 'text' => '', 'type' => $omittedRight, 'color' => null ) )
+					);
 				}
-				array_splice( $fragments, $fragment ++, 0, array( array( 'text' => $textRight, 'type' => '=', 'color' => null ) ) );
+				array_splice(
+					$fragments,
+					$fragment ++,
+					0,
+					array( array( 'text' => $textRight, 'type' => '=', 'color' => null ) )
+				);
 			}
 		}
 
@@ -3242,7 +3393,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Create html formatted diff code from diff fragments
+	 * Create html formatted diff code from diff fragments.
 	 *
 	 * @param[in] array $fragments Fragments array, abstraction layer for diff code
 	 * @param string|null $version
@@ -3254,14 +3405,18 @@ class WikEdDiff extends DifferenceEngine {
 		$fragments = &$this->fragments;
 
 		// No change, only one unchanged block in containers
-		if ( count( $fragments ) == 5 && $fragments[2]['type'] == '=' ) {
+		if ( count( $fragments ) === 5 && $fragments[2]['type'] === '=' ) {
 			$this->html = '';
 			return;
 		}
 
 		// Cycle through fragments
 		$htmlFragments = array();
-		for ( $fragment = 0; $fragment < count( $fragments ); $fragment ++ ) {
+		for (
+			$fragment = 0, $fragmentLength = count( $fragments );
+			$fragment < $fragmentLength;
+			$fragment ++
+		) {
 			$text = $fragments[$fragment]['text'];
 			$type = $fragments[$fragment]['type'];
 			$color = $fragments[$fragment]['color'];
@@ -3274,48 +3429,48 @@ class WikEdDiff extends DifferenceEngine {
 			}
 
 			// Add container start markup
-			if ( $type == '{' ) {
+			if ( $type === '{' ) {
 				$html = $this->config['htmlCode']['containerStart'];
 			}
 
 			// Add container end markup
-			elseif ( $type == '}' ) {
+			elseif ( $type === '}' ) {
 				$html = $this->config['htmlCode']['containerEnd'];
 			}
 
 			// Add fragment start markup
-			if ( $type == '[' ) {
+			if ( $type === '[' ) {
 				$html = $this->config['htmlCode']['fragmentStart'];
 			}
 
 			// Add fragment end markup
-			elseif ( $type == ']' ) {
+			elseif ( $type === ']' ) {
 				$html = $this->config['htmlCode']['fragmentEnd'];
 			}
 
 			// Add fragment separator markup
-			elseif ( $type == ',' ) {
+			elseif ( $type === ',' ) {
 				$html = $this->config['htmlCode']['separator'];
 			}
 
 			// Add omission markup
-			if ( $type == '~' ) {
+			if ( $type === '~' ) {
 				$html = $this->config['htmlCode']['omittedChars'];
 			}
 
 			// Add omission markup
-			if ( $type == ' ~' ) {
+			if ( $type === ' ~' ) {
 				$html = ' ' . $this->config['htmlCode']['omittedChars'];
 			}
 
 			// Add omission markup
-			if ( $type == '~ ' ) {
+			if ( $type === '~ ' ) {
 				$html = $this->config['htmlCode']['omittedChars'] . ' ';
 			}
 
 			// Add colored left-pointing block start markup
-			elseif ( $type == '(<' ) {
-				if ( $version != 'old' ) {
+			elseif ( $type === '(<' ) {
+				if ( $version !== 'old' ) {
 
 					// Get title
 					if ( $this->config['noUnicodeSymbols'] === true ) {
@@ -3335,8 +3490,8 @@ class WikEdDiff extends DifferenceEngine {
 			}
 
 			// Add colored right-pointing block start markup
-			elseif ( $type == '(>' ) {
-				if ( $version != 'old' ) {
+			elseif ( $type === '(>' ) {
+				if ( $version !== 'old' ) {
 
 					// Get title
 					if ( $this->config['noUnicodeSymbols'] === true ) {
@@ -3356,17 +3511,17 @@ class WikEdDiff extends DifferenceEngine {
 			}
 
 			// Add colored block end markup
-			elseif ( $type == ')' ) {
-				if ( $version != 'old' ) {
+			elseif ( $type === ')' ) {
+				if ( $version !== 'old' ) {
 					$html = $this->config['htmlCode']['blockEnd'];
 				}
 			}
 
 			// Add '=' (unchanged) text and moved block
-			if ( $type == '=' ) {
+			if ( $type === '=' ) {
 				$text = $this->htmlEscape( $text );
 				if ( $color !== null ) {
-					if ( $version != 'old' ) {
+					if ( $version !== 'old' ) {
 						$html = $this->markupBlanks( $text, true );
 					}
 				} else {
@@ -3375,11 +3530,11 @@ class WikEdDiff extends DifferenceEngine {
 			}
 
 			// Add '-' text
-			elseif ( $type == '-' ) {
-				if ( $version != 'new' ) {
+			elseif ( $type === '-' ) {
+				if ( $version !== 'new' ) {
 
 					// For old version skip '-' inside moved group
-					if ( $version != 'old' || $color === null ) {
+					if ( $version !== 'old' || $color === null ) {
 						$text = $this->htmlEscape( $text );
 						$text = $this->markupBlanks( $text, true );
 						if ( $blank === true ) {
@@ -3393,8 +3548,8 @@ class WikEdDiff extends DifferenceEngine {
 			}
 
 			// Add '+' text
-			elseif ( $type == '+' ) {
-				if ( $version != 'old' ) {
+			elseif ( $type === '+' ) {
+				if ( $version !== 'old' ) {
 					$text = $this->htmlEscape( $text );
 					$text = $this->markupBlanks( $text, true );
 					if ( $blank === true ) {
@@ -3407,41 +3562,69 @@ class WikEdDiff extends DifferenceEngine {
 			}
 
 			// Add '<' and '>' code
-			elseif ( $type == '<' || $type == '>' ) {
-				if ( $version != 'new' ) {
+			elseif ( $type === '<' || $type === '>' ) {
+				if ( $version !== 'new' ) {
 
 					// Display as deletion at original position
-					if ( $this->config['showBlockMoves'] === false || $version == 'old' ) {
+					if ( $this->config['showBlockMoves'] === false || $version === 'old' ) {
 						$text = $this->htmlEscape( $text );
 						$text = $this->markupBlanks( $text, true );
-						if ( $version == 'old' ) {
+						if ( $version === 'old' ) {
 							if ( $this->config['coloredBlocks'] === true ) {
-								$html = $this->htmlCustomize( $this->config['htmlCode']['blockColoredStart'], $color ) . $text . $this->config['htmlCode']['blockEnd'];
+								$html =
+									$this->htmlCustomize( $this->config['htmlCode']['blockColoredStart'], $color ) .
+									$text .
+									$this->config['htmlCode']['blockEnd'];
 							} else {
-								$html = $this->htmlCustomize( $this->config['htmlCode']['blockStart'], $color ) . $text . $this->config['htmlCode']['blockEnd'];
+								$html =
+									$this->htmlCustomize( $this->config['htmlCode']['blockStart'], $color ) .
+									$text .
+									$this->config['htmlCode']['blockEnd'];
 							}
 						} else {
 							if ( $blank === true ) {
-								$html = $this->config['htmlCode']['deleteStartBlank'] . $text . $this->config['htmlCode']['deleteEnd'];
+								$html =
+									$this->config['htmlCode']['deleteStartBlank'] .
+									$text .
+									$this->config['htmlCode']['deleteEnd'];
 							} else {
-								$html = $this->config['htmlCode']['deleteStart'] . $text . $this->config['htmlCode']['deleteEnd'];
+								$html =
+									$this->config['htmlCode']['deleteStart'] .
+									$text .
+									$this->config['htmlCode']['deleteEnd'];
 							}
 						}
 					}
 
 					// Display as mark
 					else {
-						if ( $type == '<' ) {
+						if ( $type === '<' ) {
 							if ( $this->config['coloredBlocks'] === true ) {
-								$html = $this->htmlCustomize( $this->config['htmlCode']['markLeftColored'], $color, $text );
+								$html = $this->htmlCustomize(
+									$this->config['htmlCode']['markLeftColored'],
+									$color,
+									$text
+								);
 							} else {
-								$html = $this->htmlCustomize( $this->config['htmlCode']['markLeft'], $color, $text );
+								$html = $this->htmlCustomize(
+									$this->config['htmlCode']['markLeft'],
+									$color,
+									$text
+								);
 							}
 						} else {
 							if ( $this->config['coloredBlocks'] === true ) {
-								$html = $this->htmlCustomize( $this->config['htmlCode']['markRightColored'], $color, $text );
+								$html = $this->htmlCustomize(
+									$this->config['htmlCode']['markRightColored'],
+									$color,
+									$text
+								);
 							} else {
-								$html = $this->htmlCustomize( $this->config['htmlCode']['markRight'], $color, $text );
+								$html = $this->htmlCustomize(
+									$this->config['htmlCode']['markRight'],
+									$color,
+									$text
+								);
 							}
 						}
 					}
@@ -3456,7 +3639,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Customize html code fragments
+	 * Customize html code fragments.
 	 * Replaces:
 	 *   {number}:    class/color/block/mark/id number
 	 *   {title}:     title attribute (popup)
@@ -3485,7 +3668,10 @@ class WikEdDiff extends DifferenceEngine {
 			$gapMark = ' [...] ';
 			$length = strlen( $title );
 			if ( $length > $max ) {
-				$title = substr( $title, 0, $max - strlen( $gapMark ) - $end ) . $gapMark . substr( $title, $length - $end );
+				$title =
+					substr( $title, 0, $max - strlen( $gapMark ) - $end ) .
+					$gapMark .
+					substr( $title, $length - $end );
 			}
 			$title = $this->htmlEscape( $title );
 			$title = str_replace( "\t", '&nbsp;&nbsp;', $title );
@@ -3497,7 +3683,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Replace html-sensitive characters in output text with character entities
+	 * Replace html-sensitive characters in output text with character entities.
 	 *
 	 * @param string $html Html code to be escaped
 	 * @return string Escaped html code
@@ -3509,25 +3695,25 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Markup tabs, newlines, and spaces in diff fragment text
+	 * Markup tabs, newlines, and spaces in diff fragment text.
 	 *
-	 * @param bool $highlight Highlight newlines and tabs in addition to spaces
+	 * @param bool $highlight Highlight newlines and spaces in addition to tabs
 	 * @param string $html Text code to be marked-up
 	 * @return string Marked-up text
 	 */
 	private function markupBlanks( $html, $highlight = false ) {
 
-		$html = str_replace( " ", $this->config['htmlCode']['space'], $html );
 		if ( $highlight === true ) {
+			$html = str_replace( " ", $this->config['htmlCode']['space'], $html );
 			$html = str_replace( "\n", $this->config['htmlCode']['newline'], $html );
-			$html = str_replace( "\t", $this->config['htmlCode']['tab'], $html );
 		}
+		$html = str_replace( "\t", $this->config['htmlCode']['tab'], $html );
 		return $html;
 	}
 
 
 	/**
-	 * Count real words in text
+	 * Count real words in text.
 	 *
 	 * @param string $text Text for word counting
 	 * @return int Number of words in text
@@ -3537,9 +3723,10 @@ class WikEdDiff extends DifferenceEngine {
 		return preg_match_all( $this->config['regExp']['countWords'], $text );
 	}
 
+
 	/**
-	 * Test diff code for consistency with input versions
-	 * Prints results to debug console
+	 * Test diff code for consistency with input versions.
+	 * Prints results to debug console.
 	 *
 	 * @param[in] WikEdDiffText $newText, $oldText Text objects
 	 */
@@ -3549,8 +3736,10 @@ class WikEdDiff extends DifferenceEngine {
 		$this->getDiffHtml( 'new' );
 		$diff = preg_replace( '/<[^>]*>/', '', $this->html );
 		$text = $this->htmlEscape( $this->newText->text );
-		if ( $diff != $text ) {
-			$this->debug( 'Error: wikEdDiff unit test failure: diff not consistent with new text version!' );
+		if ( $diff !== $text ) {
+			$this->debug(
+				'Error: wikEdDiff unit test failure: diff not consistent with new text version!'
+			);
 			$this->error = true;
 			$this->debug( 'new text', $text );
 			$this->debug( 'new diff', $diff );
@@ -3562,8 +3751,10 @@ class WikEdDiff extends DifferenceEngine {
 		$this->getDiffHtml( 'old' );
 		$diff = preg_replace( '/<[^>]*>/', '', $this->html );
 		$text = $this->htmlEscape( $this->oldText->text );
-		if ( $diff != $text ) {
-			$this->debug( 'Error: wikEdDiff unit test failure: diff not consistent with old text version!' );
+		if ( $diff !== $text ) {
+			$this->debug(
+				'Error: wikEdDiff unit test failure: diff not consistent with old text version!'
+			);
 			$this->error = true;
 			$this->debug( 'old text', $text );
 			$this->debug( 'old diff', $diff );
@@ -3581,7 +3772,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Dump blocks object to debug console
+	 * Dump blocks object to debug console.
 	 *
 	 * @param string $name Block name
 	 * @param[in] array $blocks Blocks table object
@@ -3591,8 +3782,10 @@ class WikEdDiff extends DifferenceEngine {
 		if ( $blocks === null ) {
 			$blocks = &$this->blocks;
 		}
-		$dump = "\ni \toldBl \tnewBl \toldNm \tnewNm \toldSt \tcount \tuniq \twords \tchars \ttype \tsect \tgroup \tfixed \tmoved \tname\n";
-		for ( $i = 0; $i < count( $blocks ); $i ++ ) {
+		$dump =
+			"\ni \toldBl \tnewBl \toldNm \tnewNm \toldSt \tcount \tuniq \twords " .
+			"\tchars \ttype \tsect \tgroup \tfixed \tmoved \tname\n";
+		for ( $i = 0, $blocksLength = count( $blocks ); $i < $blocksLength; $i ++ ) {
 			$dump .=
 				$i . " \t" .
 				$blocks[$i]['oldBlock'] . " \t" .
@@ -3616,7 +3809,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Dump groups object to debug console
+	 * Dump groups object to debug console.
 	 *
 	 * @param string $name Group name
 	 * @param[in] array $groups Groups table object
@@ -3626,8 +3819,10 @@ class WikEdDiff extends DifferenceEngine {
 		if ( $groups === null ) {
 			$groups = &$this->groups;
 		}
-		$dump = "\ni \toldNm \tblSta \tblEnd \tuniq \tmaxWo \twords \tchars \tfixed \toldNm \tmFrom \tcolor\n";
-		for ( $i = 0; $i < count( $groups ); $i ++ ) {
+		$dump =
+			"\ni \toldNm \tblSta \tblEnd \tuniq \tmaxWo \twords " .
+			"\tchars \tfixed \toldNm \tmFrom \tcolor\n";
+		for ( $i = 0, $groupsLength = count( $groups ); $i < $groupsLength; $i ++ ) {
 			$dump .=
 				$i . " \t" .
 				$groups[$i]['oldNumber'] . " \t" .
@@ -3647,7 +3842,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Dump fragments array to debug console
+	 * Dump fragments array to debug console.
 	 *
 	 * @param string $name Fragments name
 	 * @param[in] array $fragments Fragments array
@@ -3656,7 +3851,7 @@ class WikEdDiff extends DifferenceEngine {
 
 		$fragments = &$this->fragments;
 		$dump = "\ni \ttype \tcolor \tname\n";
-		for ( $i = 0; $i < count( $fragments ); $i ++ ) {
+		for ( $i = 0, $fragmentsLength = count( $fragments ); $i < $fragmentsLength; $i ++ ) {
 			$dump .=
 				$i . " \t\"" .
 				$fragments[$i]['type'] . "\" \t" .
@@ -3668,7 +3863,23 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Shorten text for dumping
+	 * Dump borders array to debug console.
+	 *
+	 * @param string $name Arrays name
+	 * @param[in] array $border Match border array
+	 */
+	private function debugBorders ( $name, &$borders ) {
+
+		$dump = "\ni \t[ new \told ]\n";
+		for ( $i = 0, $bordersLength = count( $borders ); $i < $bordersLength; $i ++ ) {
+			$dump .= $i . " \t[ " . $borders[$i][0] . " \t" . $borders[$i][1] . " ]\n";
+		}
+		$this->debug( $name, $dump );
+	}
+
+
+	/**
+	 * Shorten text for dumping.
 	 *
 	 * @param string $text Text to be shortened
 	 * @param int $max Max length of (shortened) text
@@ -3680,14 +3891,17 @@ class WikEdDiff extends DifferenceEngine {
 		$text = preg_replace( "/\n/", "\\n", $text );
 		$text = preg_replace( "/\t/", "  ", $text );
 		if ( mb_strlen( $text ) > $max ) {
-			$text = mb_substr( $text, 0, $max - 1 - $end ) . '…' . mb_substr( $text, mb_strlen( $text ) - $end );
+			$text =
+			mb_substr( $text, 0, $max - 1 - $end ) .
+			'…' .
+			mb_substr( $text, mb_strlen( $text ) - $end );
 		}
 		return "\"$text\"";
 	}
 
 
 	/**
-	 * Start timer 'label', analogous to JavaScript console timer
+	 * Start timer 'label', analogous to JavaScript console timer.
 	 * Usage: $this->time( 'label' );
 	 *
 	 * @param string $label Timer label
@@ -3700,13 +3914,13 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Stop timer 'label', analogous to JavaScript console timer
-	 * Logs time in milliseconds since start to debug console
+	 * Stop timer 'label', analogous to JavaScript console timer.
+	 * Logs time in milliseconds since start to debug console.
 	 * Usage: $this->timeEnd( 'label' );
 	 *
-	 * @param string $label Timer label.
-	 * @param bool $noLog Do not log result.
-	 * @return float Time in milliseconds, rounded to two decimal digits.
+	 * @param string $label Timer label
+	 * @param bool $noLog Do not log result
+	 * @return float Time in milliseconds, rounded to two decimal digits
 	 */
 	protected function timeEnd( $label, $noLog = false ) {
 
@@ -3714,7 +3928,7 @@ class WikEdDiff extends DifferenceEngine {
 		if ( isset( $this->timer[$label] ) ) {
 			$start = $this->timer[$label];
 			$stop = microtime( true );
-			$diff = round( ( $stop - $start ) * 1000 * 100 ) / 100;
+			$diff = (int)round( ( $stop - $start ) * 1000 * 100 ) / 100;
 			unset( $this->timer[$label] );
 			if ( $noLog === false ) {
 				$this->debug( $label . ': ' . $diff . ' ms' );
@@ -3725,7 +3939,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Log recursion timer results to debug console
+	 * Log recursion timer results to debug console.
 	 * Usage: $this->timeRecursionEnd();
 	 *
 	 * @param string $text Text label for output
@@ -3736,12 +3950,12 @@ class WikEdDiff extends DifferenceEngine {
 		if ( count( $this->recursionTimer ) > 1 ) {
 
 			// Subtract times spent in deeper recursions
-			for ( $i = 0; $i < count( $this->recursionTimer ) - 1; $i ++ ) {
+			for ( $i = 0, $timerEnd = count( $this->recursionTimer ) - 1; $i < $timerEnd; $i ++ ) {
 				$this->recursionTimer[$i] -= $this->recursionTimer[$i + 1];
 			}
 
 			// Log recursion times
-			for ( $i = 0; $i < count( $this->recursionTimer ); $i ++ ) {
+			for ( $i = 0, $timerLength = count( $this->recursionTimer ); $i < $timerLength; $i ++ ) {
 				$this->debug( "$text recursion $i: " . $this->recursionTimer[$i] . " ms" );
 			}
 		}
@@ -3750,7 +3964,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 	/**
-	 * Log variable values to debug console
+	 * Log variable values to debug console.
 	 * Usage: $this->debug( '$var', $var );
 	 *
 	 * @param string $name Object identifier
@@ -3768,7 +3982,7 @@ class WikEdDiff extends DifferenceEngine {
 
 
 /**
- * Data and methods for single text version (old or new one)
+ * Data and methods for single text version (old or new one).
  *
  * @class WikEdDiffText
  * @ingroup DifferenceEngine
@@ -3794,7 +4008,7 @@ class WikEdDiffText extends WikEdDiff {
 
 
 	/**
-	 * Constructor, initialize text object
+	 * Constructor, initialize text object.
 	 *
 	 * @param string $text Text of version
 	 * @param WikEdDiff $parent Parent, for configuration settings and debugging methods
@@ -3817,7 +4031,7 @@ class WikEdDiffText extends WikEdDiff {
 
 
 	/**
-	 * Parse and count words and chunks for identification of unique words
+	 * Parse and count words and chunks for identification of unique words.
 	 *
 	 * @param string $regExp Regular expression for counting words
 	 * @param[in] string $text Text of version
@@ -3826,7 +4040,7 @@ class WikEdDiffText extends WikEdDiff {
 	protected function wordParse( &$regExp ) {
 
 		preg_match_all( $regExp, $this->text, $regExpMatch );
-		for ( $i = 0; $i < count( $regExpMatch[0] ); $i ++ ) {
+		for ( $i = 0, $matchLength = count( $regExpMatch[0] ); $i < $matchLength; $i ++ ) {
 			$word = $regExpMatch[0][$i];
 			if ( !isset( $this->words[$word] ) ) {
 				$this->words[$word] = 1;
@@ -3838,7 +4052,7 @@ class WikEdDiffText extends WikEdDiff {
 	}
 
 	/**
-	 * Split text into paragraph, sentence, chunk, word, or character tokens
+	 * Split text into paragraph, sentence, chunk, word, or character tokens.
 	 *
 	 * @param string $level Level of splitting: paragraph, sentence, chunk, word, or character
 	 * @param int|null $token Index of token to be split, otherwise uses full text
@@ -3865,9 +4079,14 @@ class WikEdDiffText extends WikEdDiff {
 		// Split text into tokens, regExp match as separator
 		$number = 0;
 		$split = array();
-		preg_match_all( $this->parent->config['regExp']['split'][$level], $text, $regExpMatch, PREG_OFFSET_CAPTURE );
+		preg_match_all(
+			$this->parent->config['regExp']['split'][$level],
+			$text,
+			$regExpMatch,
+			PREG_OFFSET_CAPTURE
+		);
 		$lastIndex = 0;
-		for ( $i = 0; $i < count( $regExpMatch[0] ); $i ++ ) {
+		for ( $i = 0, $matchLength = count( $regExpMatch[0] ); $i < $matchLength; $i ++ ) {
 			$regExpMatchIndex = $regExpMatch[0][$i][1];
 			if ( $regExpMatchIndex > $lastIndex ) {
 				array_push( $split, substr( $text, $lastIndex, $regExpMatchIndex - $lastIndex ) );
@@ -3879,8 +4098,8 @@ class WikEdDiffText extends WikEdDiff {
 			array_push( $split, substr( $text, $lastIndex ) );
 		}
 
-		// Cycle trough new tokens
-		for ( $i = 0, $c = count( $split ); $i < $c; $i ++ ) {
+		// Cycle through new tokens
+		for ( $i = 0, $splitLength = count( $split ); $i < $splitLength; $i ++ ) {
 
 			// Insert current item, link to previous
 			$this->tokens[$current] = array(
@@ -3922,10 +4141,10 @@ class WikEdDiffText extends WikEdDiff {
 
 			// First or last token has been split
 			else {
-				if ( $token == $this->first ) {
+				if ( $token === $this->first ) {
 					$this->first = $first;
 				}
-				if ( $token == $this->last ) {
+				if ( $token === $this->last ) {
 					$this->last = $prev;
 				}
 			}
@@ -3933,7 +4152,7 @@ class WikEdDiffText extends WikEdDiff {
 	}
 
 	/**
-	 * Split unique unmatched tokens into smaller tokens
+	 * Split unique unmatched tokens into smaller tokens.
 	 *
 	 * @param string $level Level of splitting: sentence, chunk, or word
 	 * @param[in] array $tokens Tokens list
@@ -3954,7 +4173,7 @@ class WikEdDiffText extends WikEdDiff {
 
 
 	/**
-	 * Enumerate text token list before detecting blocks
+	 * Enumerate text token list before detecting blocks.
 	 *
 	 * @param[out] array $tokens Tokens list
 	 */
@@ -3972,7 +4191,7 @@ class WikEdDiffText extends WikEdDiff {
 
 
 	/**
-	 * Dump tokens object to debug console
+	 * Dump tokens object to debug console.
 	 *
 	 * @param string $name Text name
 	 * @param[in] int $first, $last First and last index of tokens list

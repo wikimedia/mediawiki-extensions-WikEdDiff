@@ -1,4 +1,4 @@
-/*
+﻿/*
  * wikEdDiff: inline-style difference engine with block move support
  */
 
@@ -12,56 +12,57 @@
  * @option element Node DOM node
  * @option type string Event type
  */
-window.wikEdDiffBlockHandler = function (event, element, type) {
+window.wikEdDiffBlockHandlerExt = function ( event, element, type ) {
 
 	// IE compatibility
-	if ( ( event === undefined ) && ( window.event !== undefined ) ) {
+	if ( event === undefined && window.event !== undefined ) {
 		event = window.event;
 	}
 
-	// get mark/block elements
+	// Get mark/block elements
 	var number = element.id.replace( /\D/g, '' );
-	var block = document.getElementById( 'wikEdDiffBlock' + number );
-	var mark = document.getElementById( 'wikEdDiffMark' + number );
-	if ( mark === null ) {
+	var block = document.getElementById( 'wikEdDiffBlockExt' + number );
+	var mark = document.getElementById( 'wikEdDiffMarkExt' + number );
+	if ( block === null || mark === null ) {
 		return;
 	}
 
-	// highlight corresponding mark/block pairs
-	if ( type == 'mouseover' ) {
+	// Highlight corresponding mark/block pairs
+	if ( type === 'mouseover' ) {
 		element.onmouseover = null;
 		element.onmouseout = function ( event ) {
-			window.wikEdDiffBlockHandler( event, element, 'mouseout' );
+			window.wikEdDiffBlockHandlerExt( event, element, 'mouseout' );
 		};
 		element.onclick = function ( event ) {
-			window.wikEdDiffBlockHandler( event, element, 'click' );
+			window.wikEdDiffBlockHandlerExt( event, element, 'click' );
 		};
 		block.className += ' wikEdDiffBlockHighlight';
 		mark.className += ' wikEdDiffMarkHighlight';
 	}
 
-	// remove mark/block highlighting
-	if ( ( type == 'mouseout' ) || ( type == 'click' ) ) {
+	// Remove mark/block highlighting
+	if ( type === 'mouseout' || type === 'click' ) {
 		element.onmouseout = null;
 		element.onmouseover = function ( event ) {
-			window.wikEdDiffBlockHandler( event, element, 'mouseover' );
+			window.wikEdDiffBlockHandlerExt( event, element, 'mouseover' );
 		};
 
-		// reset, allow outside container (e.g. legend)
-		if ( type != 'click' ) {
-			block.className = block.className.replace( /wikEdDiffBlockHighlight/g, '' );
-			mark.className = mark.className.replace( /wikEdDiffMarkHighlight/g, '' );
+		// Reset, allow outside container (e.g. legend)
+		if ( type !== 'click' ) {
+			block.className = block.className.replace( / wikEdDiffBlockHighlight/g, '' );
+			mark.className = mark.className.replace( / wikEdDiffMarkHighlight/g, '' );
 
-			// getElementsByClassName
+			// GetElementsByClassName
 			var container = document.getElementById( 'wikEdDiffContainer' );
 			if ( container !== null ) {
 				var spans = container.getElementsByTagName( 'span' );
-				for ( var i = 0; i < spans.length; i ++ ) {
-					if ( ( spans[i] != block ) && ( spans[i] != mark ) ) {
-						if ( spans[i].className.indexOf( ' wikEdDiffBlockHighlight' ) != -1 ) {
+				var spansLength = spans.length;
+				for ( var i = 0; i < spansLength; i ++ ) {
+					if ( spans[i] !== block && spans[i] !== mark ) {
+						if ( spans[i].className.indexOf( ' wikEdDiffBlockHighlight' ) !== -1 ) {
 							spans[i].className = spans[i].className.replace( / wikEdDiffBlockHighlight/g, '' );
 						}
-						else if ( spans[i].className.indexOf( ' wikEdDiffMarkHighlight' ) != -1 ) {
+						else if ( spans[i].className.indexOf( ' wikEdDiffMarkHighlight') !== -1 ) {
 							spans[i].className = spans[i].className.replace( / wikEdDiffMarkHighlight/g, '' );
 						}
 					}
@@ -70,26 +71,26 @@ window.wikEdDiffBlockHandler = function (event, element, type) {
 		}
 	}
 
-	// scroll to corresponding mark/block element
-	if ( type == 'click' ) {
+	// Scroll to corresponding mark/block element
+	if ( type === 'click' ) {
 
-		// get corresponding element
+		// Get corresponding element
 		var corrElement;
-		if ( element == block ) {
+		if ( element === block ) {
 			corrElement = mark;
 		}
 		else {
 			corrElement = block;
 		}
 
-		// get element height (getOffsetTop )
+		// Get element height (getOffsetTop)
 		var corrElementPos = 0;
 		var node = corrElement;
 		do {
 			corrElementPos += node.offsetTop;
 		} while ( ( node = node.offsetParent ) !== null );
 
-		// get scroll height
+		// Get scroll height
 		var top;
 		if ( window.pageYOffset !== undefined ) {
 			top = window.pageYOffset;
@@ -98,7 +99,7 @@ window.wikEdDiffBlockHandler = function (event, element, type) {
 			top = document.documentElement.scrollTop;
 		}
 
-		// get cursor pos
+		// Get cursor pos
 		var cursor;
 		if ( event.pageY !== undefined ) {
 			cursor = event.pageY;
@@ -107,13 +108,13 @@ window.wikEdDiffBlockHandler = function (event, element, type) {
 			cursor = event.clientY + top;
 		}
 
-		// get line height
+		// Get line height
 		var line = 12;
 		if ( window.getComputedStyle !== undefined ) {
 			line = parseInt( window.getComputedStyle( corrElement ).getPropertyValue( 'line-height' ) );
 		}
 
-		// scroll element under mouse cursor
+		// Scroll element under mouse cursor
 		window.scroll( 0, corrElementPos + top - cursor + line / 2 );
 	}
 	return;

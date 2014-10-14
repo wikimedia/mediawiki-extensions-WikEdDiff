@@ -6,12 +6,12 @@
     },
     "wiked-diff-desc": "Inline-style difference engine with block move support",
     "wiked-diff-empty": "(No difference)",
-    "wiked-diff-same": "=",
-    "wiked-diff-ins": "+",
-    "wiked-diff-del": "-",
-    "wiked-diff-block-left": "◀",
-    "wiked-diff-block-right": "▶",
-    "wiked-diff-block-left-nounicode": "<",
-    "wiked-diff-block-right-nounicode": ">",
-    "wiked-diff-error": "Error: diff not consistent with versions!"
+    "wiked-diff-same": "No difference between versions",
+    "wiked-diff-ins": "Inserted",
+    "wiked-diff-del": "Deleted",
+    "wiked-diff-block-left": "◀ Moved",
+    "wiked-diff-block-right": "Moved ▶",
+    "wiked-diff-block-left-nounicode": "< Moved",
+    "wiked-diff-block-right-nounicode": "Moved >",
+    "wiked-diff-error": "Error: wikEdDiff output not consistent with original versions!"
 }

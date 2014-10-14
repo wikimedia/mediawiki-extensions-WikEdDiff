@@ -1,16 +1,20 @@
-wikEdDiff: inline-style difference engine with block move support
+wikEdDiff - inline-style difference engine with block move support
+
+
+System requirements:
 
 This extension requires PHP 5.3+ and MediaWiki 1.17+.
 
+
 Installation:
 
-1. WikEdDiff requires a patch to the MediaWiki core to add the new hook "CustomDifferenceEngine".
+1. wikEdDiff requires a patch to the MediaWiki core to add the new hook "GenerateTextDiffBody".
 Add the following code to /includes/diff/DifferenceEngine.php in function generateTextDiffBody
 after "$ntext = str_replace( "\r\n", "\n", $ntext );":
 
 	# Custom difference engine hook
-	wfRunHooks( 'CustomDifferenceEngine', array( &$otext, &$ntext, &$diffText ) );
-	if ( $diffText !== false ) {
+	$diffText = '';
+	if ( !wfRunHooks( 'GenerateTextDiffBody', array( &$otext, &$ntext, &$diffText ) ) ) {
 		wfProfileOut( __METHOD__ );
 		return $diffText;
 	}
@@ -30,6 +34,9 @@ after "$ntext = str_replace( "\r\n", "\n", $ntext );":
 
 	# Enable character-refined diff (true)
 	$wgWikEdDiffCharDiff = true;
+
+	# Enable repeated diff to resolve problematic sequences (true)
+	$wgWikEdDiffRepeatedDiff = true;
 
 	# Enable recursive diff to resolve problematic sequences (true)
 	$wgWikEdDiffRecursiveDiff = true;
@@ -64,3 +71,42 @@ after "$ntext = str_replace( "\r\n", "\n", $ntext );":
 
 	# Run unit tests to prove correct working, display results in debug console (false)
 	$wgWikEdDiffUnitTesting = false;
+
+
+Change log:
+
+____________________________________________________________________________________________________
+
+Version 1.2.1 (October 14, 2014)
+
+Performance optimizations:
+
+- Sped-up calculateDiff() with linked region borders array instead of cycling through tokens
+- New option $wgWikEdDiffRepeatedDiff to turn off repeated diff refinement
+- Freed memory by undefining arrays
+- Optimized 'for' loops by precalculating termination values
+
+Bug fixes:
+
+- Fixed space highlighting breaking diff html
+- Fixed 'sentence' split regExp
+- Fixed sliding regExps
+- Removed double container from 'No change' message
+- Added UniCode support to clipDiffFragments() calculations
+
+Various:
+
+- Updated hook and hook handler to 'GenerateTextDiffBody'
+- Fragment container from <div> to <pre> for newline copying
+- Changed all comparison operators to strict
+- Added new regExp 'blankOnlyToken' for testing unique tokens
+- Removed HTML debug log
+- Made JavaScript highlight handler compatibel with wikEd diff JavaScript library
+
+____________________________________________________________________________________________________
+
+Version 1.2.0 (October 09, 2014)
+
+Initial release.
+
+____________________________________________________________________________________________________
