@@ -1,8 +1,18 @@
 {
-    "@metadata": {
-        "authors": [
-            "Cacycle"
-        ]
-    },
-    "wiked-diff-empty": "(kein Unterschied)"
+	"@metadata": {
+		"authors": [
+			"Cacycle",
+			"Metalhead64"
+		]
+	},
+	"wiked-diff-desc": "Ergänzt eine inlineartige Unterschieds-Engine mit Block-Verschiebungs-Unterstützung",
+	"wiked-diff-empty": "(kein Unterschied)",
+	"wiked-diff-same": "Kein Unterschied zwischen Versionen",
+	"wiked-diff-ins": "Eingefügt",
+	"wiked-diff-del": "Gelöscht",
+	"wiked-diff-block-left": "◀ Verschoben",
+	"wiked-diff-block-right": "Verschoben ▶",
+	"wiked-diff-block-left-nounicode": "< Verschoben",
+	"wiked-diff-block-right-nounicode": "Verschoben >",
+	"wiked-diff-error": "Fehler: Die wikEdDiff-Ausgabe ist nicht konsistent mit den Originalversionen!"
 }

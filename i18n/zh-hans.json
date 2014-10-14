@@ -1,8 +1,11 @@
 {
-    "@metadata": {
-        "authors": [
-            "Cacycle"
-        ]
-    },
-    "wiked-diff-empty": "（没有差异）"
+	"@metadata": {
+		"authors": [
+			"Cacycle",
+			"Liuxinyu970226"
+		]
+	},
+	"wiked-diff-desc": "内联样式带封禁移除支持的差异引擎",
+	"wiked-diff-empty": "（没有差异）",
+	"wiked-diff-error": "错误：差异与版本不一致！"
 }
