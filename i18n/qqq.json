@@ -1,16 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Liuxinyu970226"
 		]
 	},
 	"wiked-diff-desc": "{{desc|name=wikEdDiff|url=https://www.mediawiki.org/wiki/Extension:WikEdDiff}}",
 	"wiked-diff-empty": "This message appears instead of a \"diff\" when comparing two revisions that are identical.",
 	"wiked-diff-same": "This text or symbol is the title attribute (popup) for the \"wiked-diff-empty\" message.",
-	"wiked-diff-ins": "This text or symbol is the title attribute (popup) for insertion blocks.",
-	"wiked-diff-del": "This text or symbol is the title attribute (popup) for deletion blocks.",
-	"wiked-diff-block-left": "This text or symbol is the title attribute (popup) for moved blocks with their origin mark to the left.",
-	"wiked-diff-block-right": "This text or symbol is the title attribute (popup) for moved blocks with their origin mark to the right.",
-	"wiked-diff-block-left-nounicode": "This text or symbol is the non-UniCode alternative for the \"wiked-diff-block-left\" text or symbol for legacy browsers.",
-	"wiked-diff-block-right-nounicode": "This text or symbol is the non-UniCode alternative for the \"wiked-diff-block-right\" text or symbol for legacy browsers."
+	"wiked-diff-ins": "This text or symbol is the title attribute (popup) for insertion blocks.\n{{Identical|Inserted}}",
+	"wiked-diff-del": "This text or symbol is the title attribute (popup) for deletion blocks.\n{{Identical|Deleted}}",
+	"wiked-diff-block-left": "This text or symbol is the title attribute (popup) for moved blocks with their origin mark to the left.\n{{Identical|Moved}}",
+	"wiked-diff-block-right": "This text or symbol is the title attribute (popup) for moved blocks with their origin mark to the right.\n{{Identical|Moved}}",
+	"wiked-diff-block-left-nounicode": "This text or symbol is the non-UniCode alternative for the \"wiked-diff-block-left\" text or symbol for legacy browsers.\n{{Identical|Moved}}",
+	"wiked-diff-block-right-nounicode": "This text or symbol is the non-UniCode alternative for the \"wiked-diff-block-right\" text or symbol for legacy browsers.\n{{Identical|Moved}}"
 }

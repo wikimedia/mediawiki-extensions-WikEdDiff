@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"תומר ט"
 		]
 	},
-	"wiked-diff-empty": "(אין הבדלים)"
+	"wiked-diff-empty": "(אין הבדלים)",
+	"wiked-diff-block-left": "◀ עבר"
 }

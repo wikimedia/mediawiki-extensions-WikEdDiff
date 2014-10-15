@@ -1,8 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Shirayuki"
 		]
 	},
-	"wiked-diff-empty": "(相違点なし)"
+	"wiked-diff-desc": "ブロック移動に対応した、インライン型差分エンジン",
+	"wiked-diff-empty": "(相違点なし)",
+	"wiked-diff-same": "版間に相違点はありません",
+	"wiked-diff-ins": "挿入されました",
+	"wiked-diff-del": "削除されました",
+	"wiked-diff-block-left": "◀ 移動されました",
+	"wiked-diff-block-right": "移動されました ▶",
+	"wiked-diff-block-left-nounicode": "< 移動されました",
+	"wiked-diff-block-right-nounicode": "移動されました >",
+	"wiked-diff-error": "エラー: wikEdDiff の出力に、比較対象の 2 版との一貫性がありません。"
 }

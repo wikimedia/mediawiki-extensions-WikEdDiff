@@ -7,5 +7,12 @@
 	},
 	"wiked-diff-desc": "内联样式带封禁移除支持的差异引擎",
 	"wiked-diff-empty": "（没有差异）",
-	"wiked-diff-error": "错误：差异与版本不一致！"
+	"wiked-diff-same": "版本间无差异",
+	"wiked-diff-ins": "已插入",
+	"wiked-diff-del": "已删除",
+	"wiked-diff-block-left": "◀ 已移动",
+	"wiked-diff-block-right": "已移动 ▶",
+	"wiked-diff-block-left-nounicode": "< 已移动",
+	"wiked-diff-block-right-nounicode": "已移动 >",
+	"wiked-diff-error": "错误：wikEdDiff输出不符合原始版本！"
 }

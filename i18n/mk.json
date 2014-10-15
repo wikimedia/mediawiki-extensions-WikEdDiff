@@ -1,8 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Bjankuloski06"
 		]
 	},
-	"wiked-diff-empty": "(нема разлика)"
+	"wiked-diff-desc": "Вграден механизам во редови за споредба на разлики со поддршка за преместување на блокирања",
+	"wiked-diff-empty": "(нема разлика)",
+	"wiked-diff-same": "Нема разлики помеѓу верзиите",
+	"wiked-diff-ins": "Вметнато",
+	"wiked-diff-del": "Избришано",
+	"wiked-diff-block-left": "◀ Преместено",
+	"wiked-diff-block-right": "Преместено ▶",
+	"wiked-diff-block-left-nounicode": "< Преместено",
+	"wiked-diff-block-right-nounicode": "Преместено >",
+	"wiked-diff-error": "Грешка: Изводот од wikEdDiff не е доследен на изворните верзии!"
 }

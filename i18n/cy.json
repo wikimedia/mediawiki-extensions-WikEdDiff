@@ -1,8 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Robin Owain"
 		]
 	},
-	"wiked-diff-empty": "(Dim gwahaniaeth)"
+	"wiked-diff-empty": "(Dim gwahaniaeth)",
+	"wiked-diff-same": "Nid oes gwahaniaeth rhwng fersiynau",
+	"wiked-diff-ins": "Mewnosodwyd",
+	"wiked-diff-del": "Dilëwyd",
+	"wiked-diff-block-left": "Symudwyd",
+	"wiked-diff-block-right": "Symudwyd",
+	"wiked-diff-block-left-nounicode": "< Symudwyd",
+	"wiked-diff-block-right-nounicode": "Symudwyd >"
 }
