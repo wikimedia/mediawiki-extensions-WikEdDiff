@@ -77,6 +77,25 @@ Change log:
 
 ____________________________________________________________________________________________________
 
+Version 1.2.2 (October 16, 2014)
+
+Bug fixes:
+
+- Fixed slide gaps
+- Fixed rounding of timer results
+
+Improvements:
+
+- Added new line split for better code diffs and easier sentence split
+- Added timers to block detection routines
+- Freed memory for word count arrays
+
+Various:
+
+- Cleaned-up code
+
+____________________________________________________________________________________________________
+
 Version 1.2.1 (October 14, 2014)
 
 Performance optimizations:
