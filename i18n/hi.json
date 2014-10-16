@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Vivek Rai"
 		]
 	},
-	"wiked-diff-empty": "(कोई अंतर नहीं)"
+	"wiked-diff-empty": "(कोई अंतर नहीं)",
+	"wiked-diff-del": "हटाया"
 }

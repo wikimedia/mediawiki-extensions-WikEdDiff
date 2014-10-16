@@ -1,8 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Chrumps",
+			"Py64"
 		]
 	},
-	"wiked-diff-empty": "(Brak różnic)"
+	"wiked-diff-empty": "(Brak różnic)",
+	"wiked-diff-same": "Nie ma różnicy pomiędzy wersjami",
+	"wiked-diff-ins": "Wprowadzony",
+	"wiked-diff-del": "Usunięty",
+	"wiked-diff-block-left": "Przeniesione",
+	"wiked-diff-block-right": "Przeniesiony",
+	"wiked-diff-block-left-nounicode": "Przeniesiony"
 }

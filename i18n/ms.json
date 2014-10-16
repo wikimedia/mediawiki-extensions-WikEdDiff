@@ -1,8 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Anakmalaysia"
 		]
 	},
-	"wiked-diff-empty": "(Tiada perbezaan)"
+	"wiked-diff-empty": "(Tiada perbezaan)",
+	"wiked-diff-same": "Tiada perbezaan antara versi",
+	"wiked-diff-ins": "Disisipkan",
+	"wiked-diff-del": "Dihapuskan",
+	"wiked-diff-block-left": "◀ Dialihkan",
+	"wiked-diff-block-right": "Dialihkan ▶",
+	"wiked-diff-block-left-nounicode": "< Dialihkan",
+	"wiked-diff-block-right-nounicode": "Dialihkan >",
+	"wiked-diff-error": "Ralat: Output wikEdDiff tidak konsisten dengan versi-versi asal!"
 }

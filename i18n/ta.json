@@ -1,8 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"ElangoRamanujam"
 		]
 	},
-	"wiked-diff-empty": "(வேறுபாடு ஏதுமில்லை)"
+	"wiked-diff-empty": "(வேறுபாடு ஏதுமில்லை)",
+	"wiked-diff-same": "பதிப்புகளுக்கிடையில் வேறுபாடில்லை",
+	"wiked-diff-ins": "நுழைக்கப்பட்டது",
+	"wiked-diff-del": "நீக்கப்பட்டது",
+	"wiked-diff-block-left": "◀ நகர்த்தப்பட்டது",
+	"wiked-diff-block-right": "நகர்த்தப்பட்டது ▶",
+	"wiked-diff-block-left-nounicode": "< நகர்த்தப்பட்டது",
+	"wiked-diff-block-right-nounicode": "நகர்த்தப்பட்டது >"
 }
