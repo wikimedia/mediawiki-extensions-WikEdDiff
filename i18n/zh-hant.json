@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Liuxinyu970226"
 		]
 	},
-	"wiked-diff-empty": "（沒有差異）"
+	"wiked-diff-empty": "（沒有差異）",
+	"wiked-diff-del": "已刪除"
 }

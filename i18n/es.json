@@ -1,8 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Macofe"
 		]
 	},
-	"wiked-diff-empty": "(Sin diferencias)"
+	"wiked-diff-empty": "(Sin diferencias)",
+	"wiked-diff-same": "Sin diferencias entre versiones",
+	"wiked-diff-ins": "Insertados",
+	"wiked-diff-del": "Borrados",
+	"wiked-diff-block-left": "◀ Movidos",
+	"wiked-diff-block-right": "Movidos ▶",
+	"wiked-diff-block-left-nounicode": "< Movidos",
+	"wiked-diff-block-right-nounicode": "Movidos >",
+	"wiked-diff-error": "Error: la salida de wikEdDiff no es consistente con las versiones originales."
 }

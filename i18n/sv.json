@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Ainali"
 		]
 	},
-	"wiked-diff-empty": "(Ingen skillnad)"
+	"wiked-diff-empty": "(Ingen skillnad)",
+	"wiked-diff-del": "Raderad"
 }
