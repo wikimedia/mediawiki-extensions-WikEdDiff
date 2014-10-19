@@ -1,8 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Robby"
 		]
 	},
-	"wiked-diff-empty": "(Keen Ënnerscheed)"
+	"wiked-diff-empty": "(Keen Ënnerscheed)",
+	"wiked-diff-same": "Keen Ënnerscheed tëscht de Versiounen",
+	"wiked-diff-ins": "Dragesat",
+	"wiked-diff-del": "Geläscht",
+	"wiked-diff-block-left": "◀ Geréckelt",
+	"wiked-diff-block-right": "Geréckelt ▶",
+	"wiked-diff-block-left-nounicode": "< Geréckelt",
+	"wiked-diff-block-right-nounicode": "Geréckelt >"
 }

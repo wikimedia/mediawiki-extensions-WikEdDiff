@@ -6,5 +6,6 @@
 		]
 	},
 	"wiked-diff-empty": "(Ingen skillnad)",
+	"wiked-diff-same": "Ingen skillnad mellan versioner",
 	"wiked-diff-del": "Raderad"
 }
