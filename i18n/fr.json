@@ -1,8 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Crochet.david"
 		]
 	},
-	"wiked-diff-empty": "(Aucune différence)"
+	"wiked-diff-empty": "(Aucune différence)",
+	"wiked-diff-same": "Aucune différence entre les versions",
+	"wiked-diff-ins": "Inséré",
+	"wiked-diff-del": "Supprimé",
+	"wiked-diff-block-left": "◀ Déplacé",
+	"wiked-diff-block-right": "Déplacé ▶",
+	"wiked-diff-block-left-nounicode": "< Déplacé",
+	"wiked-diff-block-right-nounicode": "Déplacé >"
 }

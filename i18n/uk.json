@@ -1,8 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Olion"
 		]
 	},
-	"wiked-diff-empty": "(Немає відмінностей)"
+	"wiked-diff-desc": "Інструмент вбудованого порівняння з підтримкою переміщення блоків",
+	"wiked-diff-empty": "(Немає відмінностей)",
+	"wiked-diff-same": "Між версіями немає відмінностей",
+	"wiked-diff-ins": "Додано",
+	"wiked-diff-del": "Вилучено",
+	"wiked-diff-block-left": "◀ Переміщено",
+	"wiked-diff-block-right": "Переміщено ▶",
+	"wiked-diff-block-left-nounicode": "< Переміщено",
+	"wiked-diff-block-right-nounicode": "Переміщено >",
+	"wiked-diff-error": "Помилка тестування: результат wikEdDiff не відповідає оригінальним версіям!"
 }
