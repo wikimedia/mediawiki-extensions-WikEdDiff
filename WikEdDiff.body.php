@@ -1,7 +1,7 @@
 <?php
 /**
- * @version 1.2.1
- * @date October 14, 2014
+ * @version 1.2.3
+ * @date October 21, 2014
  *
  * wikEdDiff: inline-style difference engine with block move support
  *
@@ -3420,6 +3420,7 @@ class WikEdDiff extends DifferenceEngine {
 
 			// Remove split element
 			array_splice( $fragments, $fragment, 1 );
+			$fragmentsLength --;
 
 			// Add left text to fragments list
 			if ( $rangeLeft !== null ) {
@@ -3427,11 +3428,13 @@ class WikEdDiff extends DifferenceEngine {
 					$fragments, $fragment ++, 0,
 					array( array( 'text' => $textLeft, 'type' => '=', 'color' => null ) )
 				);
+				$fragmentsLength ++;
 				if ( $omittedLeft !== null ) {
 					array_splice(
 						$fragments, $fragment ++, 0,
 						array( array( 'text' => '', 'type' => $omittedLeft, 'color' => null ) )
 					);
+					$fragmentsLength ++;
 				}
 			}
 
@@ -3449,6 +3452,7 @@ class WikEdDiff extends DifferenceEngine {
 					$fragments, $fragment ++, 0,
 					array( array( 'text' => '', 'type' => '[', 'color' => null ) )
 				);
+				$fragmentsLength += 3;
 			}
 
 			// Add right text to fragments list
@@ -3460,6 +3464,7 @@ class WikEdDiff extends DifferenceEngine {
 						0,
 						array( array( 'text' => '', 'type' => $omittedRight, 'color' => null ) )
 					);
+					$fragmentsLength ++;
 				}
 				array_splice(
 					$fragments,
@@ -3467,6 +3472,7 @@ class WikEdDiff extends DifferenceEngine {
 					0,
 					array( array( 'text' => $textRight, 'type' => '=', 'color' => null ) )
 				);
+				$fragmentsLength ++;
 			}
 		}
 
