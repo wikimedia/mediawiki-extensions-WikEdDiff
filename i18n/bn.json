@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aftab1995"
+		]
+	},
+	"wiked-diff-empty": "(কোন পার্থক্য নেই)",
+	"wiked-diff-same": "সংস্করণগুলির মধ্যে কোন পার্থক্য নেই",
+	"wiked-diff-ins": "যোগ হয়েছে",
+	"wiked-diff-del": "অপসারিত",
+	"wiked-diff-block-left": "◀ সরানো হয়েছে",
+	"wiked-diff-block-right": "সরানো হয়েছে ▶",
+	"wiked-diff-block-left-nounicode": "< সরানো হয়েছে",
+	"wiked-diff-block-right-nounicode": "সরানো হয়েছে >",
+	"wiked-diff-error": "ত্রুটি: wikEdDiff আউটপুট মূল সংস্করণের সাথে সামঞ্জস্যপূর্ণ নয়!"
+}
