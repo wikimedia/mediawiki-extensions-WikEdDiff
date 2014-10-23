@@ -77,6 +77,18 @@ Change log:
 
 ____________________________________________________________________________________________________
 
+Version 1.2.4 (October 23, 2014)
+
+Bug fix:
+
+- Fixed word/chunk counts for unique token detection
+
+Improvements:
+
+- Disabled unlinking for simple texts with only short linked block lengths (i.e. test cases)
+
+____________________________________________________________________________________________________
+
 Version 1.2.3 (October 21, 2014)
 
 Bug fix:

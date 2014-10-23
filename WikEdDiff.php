@@ -33,7 +33,7 @@ $wgExtensionCredits['other'][] = array(
 	'author' => 'Cacycle',
 	'url' => 'https://www.mediawiki.org/wiki/Extension:wikEdDiff',
 	'descriptionmsg' => 'wiked-diff-desc',
-	'version' => '1.2.3',
+	'version' => '1.2.4',
 	'license-name' => 'GPL-2.0+' // GNU General Public License v2.0 or later
 );
 

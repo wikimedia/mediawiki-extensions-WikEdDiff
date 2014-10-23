@@ -1,7 +1,7 @@
 <?php
 /**
- * @version 1.2.3
- * @date October 21, 2014
+ * @version 1.2.4
+ * @date October 23, 2014
  *
  * wikEdDiff: inline-style difference engine with block move support
  *
@@ -55,6 +55,7 @@
  *    => htmlCode            HTML code fragments used for creating the output
  * -> newText              new text
  * -> oldText              old text
+ * -> maxWords             word count of longest linked block
  * -> html                 diff html
  * -> error                flag: result has not passed unit tests
  * -> bordersDown[]        linked region borders downwards, [new index, old index]
@@ -94,7 +95,7 @@
  *   => blockStart           first block index
  *   => blockEnd             last block index
  *   => unique               contains unique linked token
- *   => maxWords             word count of longest block
+ *   => maxWords             word count of longest linked block
  *   => words                word count
  *   => chars                char count
  *   => fixed                not moved from original position
@@ -153,7 +154,7 @@ class WikEdDiff extends DifferenceEngine {
 
 		global $wgContLang, $wgOut;
 
-		// load js and css
+		// Load js and css
 		$wgOut->addModules( 'ext.wikEdDiff' );
 
 		$wikEdDiff = new WikEdDiff();
@@ -342,6 +343,9 @@ class WikEdDiff extends DifferenceEngine {
 	/** @var array $blocks Block data (consecutive text tokens) in new text order */
 	protected $blocks = array();
 
+	/** @var int maxWords Maximal detected word count of all linked blocks */
+	protected $maxWords = 0;
+
 	/** @var array $groups Section blocks that are consecutive in old text order */
 	protected $groups = array();
 
@@ -470,7 +474,7 @@ class WikEdDiff extends DifferenceEngine {
 					'<\/?[^<>\[\]\{\}\n]+>|' .  // <html>
 					'\[\[[^\[\]\|\n]+\]\]\||' . // [[wiki link|
 					'\{\{[^\{\}\|\n]+\||' .     // {{template|
-					'\b((https?:|)\/\/)[^\x{00}-\x{20}\s\"\[\]\x{7f}]+/u', // url
+					'\b((https?:|)\/\/)[^\x{00}-\x{20}\s\"\[\]\x{7f}]+/u', // link
 
 				// Split into words, multi-char markup, and chars
 				'word' =>
@@ -517,7 +521,7 @@ class WikEdDiff extends DifferenceEngine {
 				'<\/?[^<>\[\]\{\}\n]+>|' .  // <html>
 				'\[\[[^\[\]\|\n]+\]\]\||' . // [[wiki link|
 				'\{\{[^\{\}\|\n]+\||' .     // {{template|
-				'\b((https?:|)\/\/)[^\x{00}-\x{20}\s\"\[\]\x{7f}]+/u', // url
+				'\b((https?:|)\/\/)[^\x{00}-\x{20}\s\"\[\]\x{7f}]+/u', // link
 
 			// RegExp detecting blank-only and single-char blocks
 			'blankBlock' => '/^([^\t\S]+|[^\t])$/u',
@@ -1348,14 +1352,14 @@ class WikEdDiff extends DifferenceEngine {
 			$this->time( $level . ( $recursionLevel ) );
 		}
 
-		// get object symbols table and linked region borders
+		// Get object symbols table and linked region borders
 		if ( $recursionLevel === 0 && $repeating === false ) {
 			$symbols = &$this->symbols;
 			$bordersDown = &$this->bordersDown;
 			$bordersUp = &$this->bordersUp;
 		}
 
-		// create empty local symbols table and linked region borders arrays
+		// Create empty local symbols table and linked region borders arrays
 		else {
 			$symbols = array(
 				'token' => array(),
@@ -1366,7 +1370,7 @@ class WikEdDiff extends DifferenceEngine {
 			$bordersUp = array();
 		}
 
-		// updated versions of linked region borders
+		// Updated versions of linked region borders
 		$bordersUpNext = array();
 		$bordersDownNext = array();
 
@@ -1405,7 +1409,7 @@ class WikEdDiff extends DifferenceEngine {
 				break;
 			}
 
-			// get next token
+			// Get next token
 			if ( $up === false ) {
 				$i = $this->newText->tokens[$i]['next'];
 			} else {
@@ -1451,7 +1455,7 @@ class WikEdDiff extends DifferenceEngine {
 				break;
 			}
 
-			// get next token
+			// Get next token
 			if ( $up === false ) {
 				$j = $this->oldText->tokens[$j]['next'];
 			} else {
@@ -1487,7 +1491,7 @@ class WikEdDiff extends DifferenceEngine {
 						$oldTokenObj['link'] = $newToken;
 						$symbols['linked'] = true;
 
-						// save linked region borders
+						// Save linked region borders
 						array_push( $bordersDown, array( $newToken, $oldToken ) );
 						array_push( $bordersUp, array( $newToken, $oldToken ) );
 
@@ -1500,31 +1504,26 @@ class WikEdDiff extends DifferenceEngine {
 								$token = $newTokenObj['token'];
 								preg_match_all( $this->config['regExp']['countWords'], $token, $regExpMatchWord );
 								preg_match_all( $this->config['regExp']['countChunks'], $token, $regExpMatchChunk );
-								$words = count( $regExpMatchWord[0] ) + count( $regExpMatchChunk[0] );
+								$words = array_merge( $regExpMatchWord[0], $regExpMatchChunk[0] );
 
 								// Unique if longer than min block length
-								if ( $words >= $this->config['blockMinLength'] ) {
+								$wordsLength = count( $words );
+								if ( $wordsLength >= $this->config['blockMinLength'] ) {
 									$unique = true;
 								}
 
 								// Unique if it contains at least one unique word
 								else {
-									for (
-										$word = 0, $wordsLength = count( $words );
-										$word < $wordsLength;
-										$word ++
-									) {
+									for ( $i = 0; $i < $wordsLength; $i ++ ) {
+										$word = $words[$i];
 										if (
-											isset( $this->oldText->words[ $words[$word] ] ) &&
-											isset( $this->newText->words[ $words[$word] ] )
+											isset( $this->oldText->words[$word] ) &&
+											isset( $this->newText->words[$word] ) &&
+											$this->oldText->words[$word] === 1 &&
+											$this->newText->words[$word] === 1
 										) {
-											if (
-												$this->oldText->words[ $words[$word] ] === 1 &&
-												$this->newText->words[ $words[$word] ] === 1
-											) {
-												$unique = true;
-												break;
-											}
+											$unique = true;
+											break;
 										}
 									}
 								}
@@ -1695,13 +1694,13 @@ class WikEdDiff extends DifferenceEngine {
 				}
 			}
 
-			// save updated linked region borders to object
+			// Save updated linked region borders to object
 			if ( $recursionLevel === 0 && $repeating === false ) {
 				$this->bordersDown = $bordersDownNext;
 				$this->bordersUp = $bordersUpNext;
 			}
 
-			// merge local updated linked region borders into object
+			// Merge local updated linked region borders into object
 			else {
 				$this->bordersDown = array_merge( $this->bordersDown, $bordersDownNext );
 				$this->bordersUp = array_merge( $this->bordersUp, $bordersUpNext );
@@ -1847,8 +1846,13 @@ class WikEdDiff extends DifferenceEngine {
 		$this->setFixed();
 
 		// Convert groups to insertions/deletions if maximum block length is too short
+		// Only for more complex texts that actually have blocks of minimum block length
 		$unlinkCount = 0;
-		if ( $this->config['unlinkBlocks'] === true && $this->config['blockMinLength'] > 0 ) {
+		if (
+			$this->config['unlinkBlocks'] === true &&
+			$this->config['blockMinLength'] > 0 &&
+			$this->maxWords >= $this->config['blockMinLength']
+		) {
 			if ( $this->config['timer'] === true ) {
 				$this->time( 'total unlinking' );
 			}
@@ -1867,6 +1871,7 @@ class WikEdDiff extends DifferenceEngine {
 					$this->slideGaps( $this->oldText, $this->newText );
 
 					// Repeat block detection from start
+					$this->maxWords = 0;
 					$this->getSameBlocks();
 					$this->getSections();
 					$this->getGroups();
@@ -2132,6 +2137,11 @@ class WikEdDiff extends DifferenceEngine {
 					'color'      => null
 				) );
 				$block = $groupEnd;
+
+				// Set global word count of longest linked block
+				if ( $maxWords > $this->maxWords ) {
+					$this->maxWords = $maxWords;
+				}
 			}
 		}
 		if ( $this->config['timer'] === true ) {
@@ -4109,7 +4119,7 @@ class WikEdDiffText extends WikEdDiff {
 		$this->text = $text;
 		$this->parent = $parent;
 
-		// parse and count words and chunks for identification of unique real words
+		// Parse and count words and chunks for identification of unique real words
 		if ( $parent->config['timer'] === true ) {
 			$parent->time( 'wordParse' );
 		}
