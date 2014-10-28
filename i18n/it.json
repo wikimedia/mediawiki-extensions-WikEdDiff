@@ -1,8 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Beta16"
 		]
 	},
-	"wiked-diff-empty": "(Nessuna differenza)"
+	"wiked-diff-empty": "(Nessuna differenza)",
+	"wiked-diff-same": "Nessuna differenza tra le versioni",
+	"wiked-diff-ins": "Inserito",
+	"wiked-diff-del": "Cancellato",
+	"wiked-diff-block-left": "◀ Spostato",
+	"wiked-diff-block-right": "Spostato ▶",
+	"wiked-diff-block-left-nounicode": "< Spostato",
+	"wiked-diff-block-right-nounicode": "Spostato >",
+	"wiked-diff-error": "Errore: output wikEdDiff non coerente con le versioni originali!"
 }
