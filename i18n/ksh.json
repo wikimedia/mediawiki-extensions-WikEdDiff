@@ -1,8 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Purodha"
 		]
 	},
-	"wiked-diff-empty": "(Keine Ongerscheid)"
+	"wiked-diff-desc": "Deid e Projamm en et Wikki, wat Ongerscheide zwesche de Väsjohne vun Sigge aanzeije kann un Schtöke fengk, di eröm bewääsch woodte.",
+	"wiked-diff-empty": "(Keine Ongerscheid)",
+	"wiked-diff-same": "Kein Ongerscheide zwesche de Väsjohne",
+	"wiked-diff-ins": "Enjeföhsch",
+	"wiked-diff-del": "Eruß jenumme",
+	"wiked-diff-block-left": "◀ Bewääsch",
+	"wiked-diff-block-right": "Bewääsch ▶",
+	"wiked-diff-block-left-nounicode": "< Bewääsch",
+	"wiked-diff-block-right-nounicode": "Bewääsch >",
+	"wiked-diff-error": "Fähler: De Ußjabe vum <code xml:lang=\"en\" lang=\"en\">wikEdDiff</code> paß nit met de ojinahle Väsjohne zersamme!"
 }
