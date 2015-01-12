@@ -6,5 +6,9 @@
 		]
 	},
 	"wiked-diff-empty": "（沒有差異）",
-	"wiked-diff-del": "已刪除"
+	"wiked-diff-del": "已刪除",
+	"wiked-diff-block-left": "◀ 已移動",
+	"wiked-diff-block-right": "已移動 ▶",
+	"wiked-diff-block-left-nounicode": "< 已移動",
+	"wiked-diff-block-right-nounicode": "已移動 >"
 }
