@@ -49,4 +49,5 @@ $wgResourceModules['ext.wikEdDiff'] = array(
 $wgMessagesDirs['WikEdDiff'] = $dir . 'i18n';
 $wgExtensionMessagesFiles['WikEdDiff'] =  $dir . 'WikEdDiff.i18n.php';
 $wgAutoloadClasses['WikEdDiff'] = $dir . 'WikEdDiff.body.php';
+$wgAutoloadClasses['WikEdDiffText'] = $dir . 'WikEdDiff.body.php';
 $wgHooks['GenerateTextDiffBody'][] = 'WikEdDiff::onGenerateTextDiffBody';
