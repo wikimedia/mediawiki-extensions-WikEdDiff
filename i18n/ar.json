@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"محمد أحمد عبد الفتاح"
 		]
 	},
-	"wiked-diff-empty": "(لا فرق)"
+	"wiked-diff-empty": "(لا فرق)",
+	"wiked-diff-same": "لا فرق بين المراجعات"
 }
