@@ -8,16 +8,17 @@ This extension requires PHP 5.3+ and MediaWiki 1.17+.
 
 Installation:
 
-1. wikEdDiff requires a patch to the MediaWiki core to add the new hook "GenerateTextDiffBody".
-Add the following code to /includes/diff/DifferenceEngine.php in function generateTextDiffBody
-after "$ntext = str_replace( "\r\n", "\n", $ntext );":
+1. MediaWiki versions before 1.25 require a patch to core: replace the content of
+  function createDifferenceEngine in includes/content/ContentHandler.php
+  with the following code:
 
-	# Custom difference engine hook
-	$diffText = '';
-	if ( !wfRunHooks( 'GenerateTextDiffBody', array( &$otext, &$ntext, &$diffText ) ) ) {
-		wfProfileOut( __METHOD__ );
-		return $diffText;
+	// hook: get diff engine class name
+	$diffEngineClass = '';
+	if ( wfRunHooks( 'GetDiffEngineClass', array( $context, &$diffEngineClass ) ) ) {
+		// use default diff engine
+		$diffEngineClass = $this->getDiffEngineClass();
 	}
+	return new $diffEngineClass( $context, $old, $new, $rcid, $refreshCache, $unhide );
 
 2. Add the following code to /LocalSettings.php:
 
@@ -74,6 +75,15 @@ after "$ntext = str_replace( "\r\n", "\n", $ntext );":
 
 
 Change log:
+____________________________________________________________________________________________________
+
+Version 1.2.5 (July 20, 2014)
+
+Bug fix:
+
+- Patch to core is no longer required after integration of custom diff engines into MediaWiki core
+  with new hook "GetDifferenceEngine", see:
+  "Add hook for custom difference engine (WikEdDiff)" https://gerrit.wikimedia.org/r/#/c/166143/10
 
 ____________________________________________________________________________________________________
 

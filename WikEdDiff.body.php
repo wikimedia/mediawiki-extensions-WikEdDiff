@@ -1,7 +1,7 @@
 <?php
 /**
- * @version 1.2.4
- * @date October 23, 2014
+ * @version 1.2.5
+ * @date July 20, 2015
  *
  * wikEdDiff: inline-style difference engine with block move support
  *
@@ -120,50 +120,97 @@
 
 
 /**
- * wikEd diff main class.
+ * Difference engine interface to be used with wikEd diff.
+ *
+ * @class WikEdDiffEngine
+ * @ingroup DifferenceEngine
+ * @ingroup wikEdDiff
+ */
+class WikEdDifferenceEngine extends DifferenceEngine {
+
+	/**
+	 * GetDiffEngineClass hook handler.
+	 * MediaWiki versions before 1.25 require a patch to core: replace the content of
+	 *   function createDifferenceEngine in includes/content/ContentHandler.php
+	 *   with the following code:
+	 *
+	 * @code
+	 *
+	 * // hook: get diff engine class name
+	 * $diffEngineClass = '';
+	 * if ( wfRunHooks( 'GetDiffEngineClass', array( $context, &$diffEngineClass ) ) ) {
+	 *   // use default diff engine
+	 *   $diffEngineClass = $this->getDiffEngineClass();
+	 * }
+	 * return new $diffEngineClass( $context, $old, $new, $rcid, $refreshCache, $unhide );
+	 *
+	 * @endcode
+	 *
+	 * @param IContextSource $context Context to be used
+	 * @param[out] string $diffEngine Class name of diff engine to be used for diff
+	 * @return bool False for valid class name in $diffEngineClass, true for default
+	 */
+	public static function onGetDifferenceEngine ( $context, $old, $new, $refreshCache, $unhide, &$differenceEngine ) {
+		$differenceEngine = new WikEdDifferenceEngine( $context, $old, $new, $refreshCache, $unhide );
+		return false;
+	}
+
+	/**
+	 * Constructor
+	 * @param IContextSource $context context to use, anything else will be ignored
+	 * @param int $old old ID we want to show and diff with.
+	 * @param string|int $new either revision ID or 'prev' or 'next'. Default: 0.
+	 * @param bool $refreshCache If set, refreshes the diff cache
+	 * @param bool $unhide If set, allow viewing deleted revs
+	 */
+	public function __construct(
+		$context = null, $old = 0, $new = 0, $refreshCache = false, $unhide = false
+	) {
+		if ( $context instanceof IContextSource ) {
+			$this->setContext( $context );
+		}
+		$this->mOldid = $old;
+		$this->mNewid = $new;
+		$this->mRefreshCache = $refreshCache;
+		$this->unhide = $unhide;
+	}
+
+	/**
+	 * Generate a diff, no caching. Overriding parent class method.
+	 *
+	 * @param[in/out] string $newText, $otext New an old text versions
+	 * @return string $diffText Diff html result
+	 */
+	public function generateTextDiffBody ( $otext, $ntext ) {
+$this->debug( '$this->mDiffLang', $this->mDiffLang);
+		global $wgContLang, $wgOut;
+		wfProfileIn( __METHOD__ );
+
+		// Load js and css
+		$wgOut->addModules( 'ext.wikEdDiff' );
+
+		$otext = str_replace( "\r\n", "\n", $otext );
+		$ntext = str_replace( "\r\n", "\n", $ntext );
+
+		$otext = $wgContLang->segmentForDiff( $otext );
+		$ntext = $wgContLang->segmentForDiff( $ntext );
+
+		$diffEngine = new WikEdDiff();
+		$diffText = $wgContLang->unsegmentForDiff( $diffEngine->diff( $otext, $ntext ) );
+		wfProfileOut( __METHOD__ );
+		return $diffText;
+	}
+}
+
+
+/**
+ * wikEd diff engine main class.
  *
  * @class WikEdDiff
  * @ingroup DifferenceEngine
  * @ingroup wikEdDiff
  */
-class WikEdDiff extends DifferenceEngine {
-
-
-	/**
-	 * Integration into DifferenceEngine through new hook GenerateTextDiffBody:
-	 *
-	 * Add the following code to DifferenceEngine.php in function generateTextDiffBody after
-	 *   "$ntext = str_replace( "\r\n", "\n", $ntext );":
-	 *
-	 * @code
-	 *
-	 * # Custom difference engine hook
-	 * $diffText = '';
-	 * if ( !wfRunHooks( 'GenerateTextDiffBody', array( &$otext, &$ntext, &$diffText ) ) ) {
-	 *   wfProfileOut( __METHOD__ );
-	 *   return $diffText;
-	 * }
-	 *
-	 * @endcode
-	 *
-	 * @param[in/out] string $newText, $otext New an old text versions
-	 * @param[in/out] string|bool $diffText Diff html result
-	 * @return bool False: $diffText contains valid diff; true: use system default diff method
-	 */
-	public static function onGenerateTextDiffBody ( &$otext, &$ntext, &$diffText ) {
-
-		global $wgContLang, $wgOut;
-
-		// Load js and css
-		$wgOut->addModules( 'ext.wikEdDiff' );
-
-		$wikEdDiff = new WikEdDiff();
-		$otext = $wgContLang->segmentForDiff( $otext );
-		$ntext = $wgContLang->segmentForDiff( $ntext );
-		$diffText = $wgContLang->unsegmentForDiff( $wikEdDiff->diff( $otext, $ntext ) );
-		return false;
-	}
-
+class WikEdDiff {
 
 	/** @var array $config Configuration and customization settings */
 	protected $config = array(
@@ -658,7 +705,7 @@ class WikEdDiff extends DifferenceEngine {
 	 * @param[out] string $html Html code of diff
 	 * @return string Html code of diff
 	 */
-	public function diff ( &$oldString, &$newString ) {
+	public function diff ( $oldString, $newString ) {
 
 		// Start total timer
 		if ( $this->config['timer'] === true ) {
@@ -1210,7 +1257,7 @@ class WikEdDiff extends DifferenceEngine {
 	 *
 	 * @param[in/out] wikEdDiffText $text, $textLinked These two are $newText and $oldText
 	 */
-	private function slideGaps( &$text, &$textLinked ) {
+	private function slideGaps( $text, $textLinked ) {
 
 		$regExpSlideBorder = $this->config['regExp']['slideBorder'];
 		$regExpSlideStop = $this->config['regExp']['slideStop'];
@@ -2222,7 +2269,7 @@ class WikEdDiff extends DifferenceEngine {
 	 * @param array $cache Cache object, contains $returnObj for $start
 	 * @return array $returnObj Contains path and char length
 	 */
-	private function findMaxPath( $start, &$groupEnd, &$cache ) {
+	private function findMaxPath( $start, $groupEnd, &$cache ) {
 
 		$groups = &$this->groups;
 
@@ -2353,7 +2400,7 @@ class WikEdDiff extends DifferenceEngine {
 	 * @param[in] array $blocks Blocks table object
 	 * @param[out] WikEdDiffText $newText, $oldText Text objects, link property
 	 */
-	private function unlinkSingleBlock( &$block ) {
+	private function unlinkSingleBlock( $block ) {
 
 		// Cycle through old text
 		$j = $block['oldStart'];
@@ -3819,7 +3866,7 @@ class WikEdDiff extends DifferenceEngine {
 	 * @param string $text Text for word counting
 	 * @return int Number of words in text
 	 */
-	private function wordCount( &$text ) {
+	private function wordCount( $text ) {
 
 		return preg_match_all( $this->config['regExp']['countWords'], $text );
 	}
@@ -3878,7 +3925,7 @@ class WikEdDiff extends DifferenceEngine {
 	 * @param string $name Block name
 	 * @param[in] array $blocks Blocks table object
 	 */
-	private function debugBlocks( $name, &$blocks = null ) {
+	private function debugBlocks( $name, $blocks = null ) {
 
 		if ( $blocks === null ) {
 			$blocks = &$this->blocks;
@@ -3915,7 +3962,7 @@ class WikEdDiff extends DifferenceEngine {
 	 * @param string $name Group name
 	 * @param[in] array $groups Groups table object
 	 */
-	private function debugGroups( $name, &$groups = null ) {
+	private function debugGroups( $name, $groups = null ) {
 
 		if ( $groups === null ) {
 			$groups = &$this->groups;
@@ -3969,7 +4016,7 @@ class WikEdDiff extends DifferenceEngine {
 	 * @param string $name Arrays name
 	 * @param[in] array $border Match border array
 	 */
-	private function debugBorders ( $name, &$borders ) {
+	private function debugBorders ( $name, $borders ) {
 
 		$dump = "\ni \t[ new \told ]\n";
 		for ( $i = 0, $bordersLength = count( $borders ); $i < $bordersLength; $i ++ ) {
@@ -4114,7 +4161,7 @@ class WikEdDiffText extends WikEdDiff {
 	 * @param string $text Text of version
 	 * @param WikEdDiff $parent Parent, for configuration settings and debugging methods
 	 */
-	public function __construct ( &$text, &$parent ) {
+	public function __construct ( $text, $parent ) {
 
 		$this->text = $text;
 		$this->parent = $parent;
@@ -4138,7 +4185,7 @@ class WikEdDiffText extends WikEdDiff {
 	 * @param[in] string $text Text of version
 	 * @param[out] array $words Number of word occurrences
 	 */
-	protected function wordParse( &$regExp ) {
+	protected function wordParse( $regExp ) {
 
 		preg_match_all( $regExp, $this->text, $regExpMatch );
 		for ( $i = 0, $matchLength = count( $regExpMatch[0] ); $i < $matchLength; $i ++ ) {
@@ -4161,7 +4208,7 @@ class WikEdDiffText extends WikEdDiff {
 	 * @param[out] array $tokens Tokens list
 	 * @param[out] int $first, $last First and last index of tokens list
 	 */
-	protected function splitText( $level, &$token = null ) {
+	protected function splitText( $level, $token = null ) {
 
 		$prev = null;
 		$next = null;
@@ -4174,7 +4221,7 @@ class WikEdDiffText extends WikEdDiff {
 		} else {
 			$prev = $this->tokens[$token]['prev'];
 			$next = $this->tokens[$token]['next'];
-			$text = &$this->tokens[$token]['token'];
+			$text = $this->tokens[$token]['token'];
 		}
 
 		// Split text into tokens, regExp match as separator
