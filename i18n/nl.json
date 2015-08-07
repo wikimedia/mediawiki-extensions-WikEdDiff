@@ -2,10 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Cacycle",
-			"Esketti"
+			"Esketti",
+			"McDutchie"
 		]
 	},
-	"wiked-diff-desc": "Inline-stijl verschil engine met blokkadeverplaatsings ondersteuning",
+	"wiked-diff-desc": "Verschillen tonen met ingebouwde stijl en ondersteuning voor het verplaatsen van blokken",
 	"wiked-diff-empty": "(geen verschil)",
 	"wiked-diff-same": "Geen verschil tussen de versies",
 	"wiked-diff-ins": "Ingevoegd",
@@ -14,5 +15,5 @@
 	"wiked-diff-block-right": "Verplaatst ▶",
 	"wiked-diff-block-left-nounicode": "< Verplaatst",
 	"wiked-diff-block-right-nounicode": "Verplaatst >",
-	"wiked-diff-error": "Fout: wikEdDiff output komt niet overeen met de originele versies!"
+	"wiked-diff-error": "Fout: de uitvoer van wikEdDiff komt niet overeen met de originele versies!"
 }
