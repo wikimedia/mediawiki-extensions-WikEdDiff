@@ -1,8 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Xuacu"
 		]
 	},
-	"wiked-diff-empty": "(Nun hai diferencies)"
+	"wiked-diff-desc": "Motor de diferencies d'estilu en llinia con encontu pa movimientu de bloques",
+	"wiked-diff-empty": "(Nun hai diferencies)",
+	"wiked-diff-same": "Nun hai diferencies ente les versiones",
+	"wiked-diff-ins": "Inxertáu",
+	"wiked-diff-del": "Desaniciáu",
+	"wiked-diff-block-left": "◀ Movíu",
+	"wiked-diff-block-right": "Movíu ▶",
+	"wiked-diff-block-left-nounicode": "< Movíu",
+	"wiked-diff-block-right-nounicode": "Movíu >",
+	"wiked-diff-error": "Error: la salida de wikEdDiff nun ye consistente coles versiones orixinales."
 }
