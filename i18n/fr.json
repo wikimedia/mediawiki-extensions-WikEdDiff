@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Cacycle",
-			"Crochet.david"
+			"Crochet.david",
+			"Wladek92"
 		]
 	},
 	"wiked-diff-empty": "(Aucune différence)",
@@ -12,5 +13,6 @@
 	"wiked-diff-block-left": "◀ Déplacé",
 	"wiked-diff-block-right": "Déplacé ▶",
 	"wiked-diff-block-left-nounicode": "< Déplacé",
-	"wiked-diff-block-right-nounicode": "Déplacé >"
+	"wiked-diff-block-right-nounicode": "Déplacé >",
+	"wiked-diff-error": "Erreur: la sortie wikEdDiff n'est pas compatible avec les versions originales !"
 }
