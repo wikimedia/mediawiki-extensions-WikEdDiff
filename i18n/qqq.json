@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Cacycle",
-			"Liuxinyu970226"
+			"Liuxinyu970226",
+			"Umherirrender"
 		]
 	},
 	"wiked-diff-desc": "{{desc|name=wikEdDiff|url=https://www.mediawiki.org/wiki/Extension:WikEdDiff}}",
@@ -13,5 +14,6 @@
 	"wiked-diff-block-left": "This text or symbol is the title attribute (popup) for moved blocks with their origin mark to the left.\n{{Identical|Moved}}",
 	"wiked-diff-block-right": "This text or symbol is the title attribute (popup) for moved blocks with their origin mark to the right.\n{{Identical|Moved}}",
 	"wiked-diff-block-left-nounicode": "This text or symbol is the non-UniCode alternative for the \"wiked-diff-block-left\" text or symbol for legacy browsers.\n{{Identical|Moved}}",
-	"wiked-diff-block-right-nounicode": "This text or symbol is the non-UniCode alternative for the \"wiked-diff-block-right\" text or symbol for legacy browsers.\n{{Identical|Moved}}"
+	"wiked-diff-block-right-nounicode": "This text or symbol is the non-UniCode alternative for the \"wiked-diff-block-right\" text or symbol for legacy browsers.\n{{Identical|Moved}}",
+	"wiked-diff-error": "Used as error message"
 }
