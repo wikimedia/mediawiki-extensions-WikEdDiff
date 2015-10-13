@@ -1,17 +1,17 @@
 {
-    "@metadata": {
-        "authors": [
-            "Cacycle"
-        ]
-    },
-    "wiked-diff-desc": "Inline-style difference engine with block move support",
-    "wiked-diff-empty": "(No difference)",
-    "wiked-diff-same": "No difference between versions",
-    "wiked-diff-ins": "Inserted",
-    "wiked-diff-del": "Deleted",
-    "wiked-diff-block-left": "◀ Moved",
-    "wiked-diff-block-right": "Moved ▶",
-    "wiked-diff-block-left-nounicode": "< Moved",
-    "wiked-diff-block-right-nounicode": "Moved >",
-    "wiked-diff-error": "Error: wikEdDiff output not consistent with original versions!"
+	"@metadata": {
+		"authors": [
+			"Cacycle"
+		]
+	},
+	"wiked-diff-desc": "Inline-style difference engine with block move support",
+	"wiked-diff-empty": "(No difference)",
+	"wiked-diff-same": "No difference between versions",
+	"wiked-diff-ins": "Inserted",
+	"wiked-diff-del": "Deleted",
+	"wiked-diff-block-left": "◀ Moved",
+	"wiked-diff-block-right": "Moved ▶",
+	"wiked-diff-block-left-nounicode": "< Moved",
+	"wiked-diff-block-right-nounicode": "Moved >",
+	"wiked-diff-error": "Error: wikEdDiff output not consistent with original versions!"
 }
