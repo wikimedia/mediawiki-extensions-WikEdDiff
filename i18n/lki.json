@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hosseinblue"
+		]
+	},
+	"wiked-diff-desc": "سبک درون‌خطی تفاوت با بستهٔ پشتیبانی از انتقال",
+	"wiked-diff-empty": "(بدون تفاوت)",
+	"wiked-diff-same": "تفاوتی بین نسخه‌ها وجود ندارد",
+	"wiked-diff-ins": "قرار داده‌شده/نریا",
+	"wiked-diff-del": "حۀذف کردن/پاک کردن",
+	"wiked-diff-block-left": "انتقال یافته◀",
+	"wiked-diff-block-right": "▶ انتقال یافته",
+	"wiked-diff-block-left-nounicode": "انتقال یافته >",
+	"wiked-diff-block-right-nounicode": "< انتقال یافته",
+	"wiked-diff-error": "خطا: خروجی wikEdDiff در نسخهٔ اصلی وجود ندارد!"
+}
