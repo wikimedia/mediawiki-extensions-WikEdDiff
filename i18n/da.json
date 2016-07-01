@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Sarrus"
 		]
 	},
-	"wiked-diff-empty": "(Ingen forskel)"
+	"wiked-diff-empty": "(Ingen forskel)",
+	"wiked-diff-del": "Slettet"
 }
