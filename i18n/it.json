@@ -2,9 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Cacycle",
-			"Beta16"
+			"Beta16",
+			"Selven"
 		]
 	},
+	"wiked-diff-desc": "Motori di differene in stile lineare con supporto allo spostamento blocco",
 	"wiked-diff-empty": "(Nessuna differenza)",
 	"wiked-diff-same": "Nessuna differenza tra le versioni",
 	"wiked-diff-ins": "Inserito",
