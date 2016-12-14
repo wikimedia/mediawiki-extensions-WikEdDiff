@@ -1,8 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Jon Harald Søby"
 		]
 	},
-	"wiked-diff-empty": "(Ingen forskjell)"
+	"wiked-diff-desc": "Diffmotor med inline-stil og blokkflyttingsstøtte",
+	"wiked-diff-empty": "(Ingen forskjell)",
+	"wiked-diff-same": "Ingen forskjell mellom versjonene",
+	"wiked-diff-ins": "Satt inn",
+	"wiked-diff-del": "Slettet",
+	"wiked-diff-block-left": "◀ Flyttet",
+	"wiked-diff-block-right": "Flyttet ▶",
+	"wiked-diff-block-left-nounicode": "< Flyttet",
+	"wiked-diff-block-right-nounicode": "Flyttet >",
+	"wiked-diff-error": "Feil: wikEdDiff-resultatet stemmer ikke med originalversjonene!"
 }
