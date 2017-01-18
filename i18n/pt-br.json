@@ -1,8 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"HenriqueCrang"
 		]
 	},
-	"wiked-diff-empty": "(Sem diferença)"
+	"wiked-diff-empty": "(Sem diferença)",
+	"wiked-diff-same": "Nenhuma diferença entre versões",
+	"wiked-diff-ins": "Inserido",
+	"wiked-diff-del": "Excluído",
+	"wiked-diff-block-left": "◀ Movido",
+	"wiked-diff-block-right": "Movido ▶",
+	"wiked-diff-block-left-nounicode": "< Movido",
+	"wiked-diff-block-right-nounicode": "Movido >",
+	"wiked-diff-error": "Erro> saída de wikEdDiff não consistente com versões originais!"
 }
