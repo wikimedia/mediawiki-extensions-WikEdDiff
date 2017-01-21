@@ -1,8 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"McDutchie"
 		]
 	},
-	"wiked-diff-empty": "(Nulle differentia)"
+	"wiked-diff-desc": "Pote identificar differentias inter paginas e monstrar los in texto continue, con recognoscentia de blocos displaciate.",
+	"wiked-diff-empty": "(Nulle differentia)",
+	"wiked-diff-same": "Nulle differentia inter versiones",
+	"wiked-diff-ins": "Inserite",
+	"wiked-diff-del": "Delite",
+	"wiked-diff-block-left": "◀ Displaciate",
+	"wiked-diff-block-right": "Displaciate ▶",
+	"wiked-diff-block-left-nounicode": "< Displaciate",
+	"wiked-diff-block-right-nounicode": "Displaciate >",
+	"wiked-diff-error": "Error: output de wikEdDiff non consistente con versiones original!"
 }
