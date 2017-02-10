@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Pyscowicz"
 		]
 	},
-	"wiked-diff-empty": "(ei eroavaisuuksia)"
+	"wiked-diff-empty": "(ei eroavaisuuksia)",
+	"wiked-diff-del": "Poistettu"
 }
