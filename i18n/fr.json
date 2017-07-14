@@ -4,10 +4,11 @@
 			"Cacycle",
 			"Crochet.david",
 			"Wladek92",
-			"Gomoko"
+			"Gomoko",
+			"Urhixidur"
 		]
 	},
-	"wiked-diff-desc": "Moteur de différence de style interne avec support du déplacement de blocs",
+	"wiked-diff-desc": "Moteur de différence de style interne avec prise en charge du déplacement de blocs",
 	"wiked-diff-empty": "(Aucune différence)",
 	"wiked-diff-same": "Aucune différence entre les versions",
 	"wiked-diff-ins": "Inséré",
