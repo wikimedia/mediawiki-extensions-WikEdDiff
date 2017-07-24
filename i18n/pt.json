@@ -1,8 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Hamilton Abreu"
 		]
 	},
-	"wiked-diff-empty": "(Sem diferenças)"
+	"wiked-diff-desc": "Motor de diferenças, de estilo em linha, com suporte de movimentação de blocos",
+	"wiked-diff-empty": "(Sem diferenças)",
+	"wiked-diff-same": "Sem diferenças entre versões",
+	"wiked-diff-ins": "Inserido",
+	"wiked-diff-del": "Eliminado",
+	"wiked-diff-block-left": "◀ Movido",
+	"wiked-diff-block-right": "Movido ▶",
+	"wiked-diff-block-left-nounicode": "< Movido",
+	"wiked-diff-block-right-nounicode": "Movido >",
+	"wiked-diff-error": "Erro: A saída de wikEdDiff não é consistente com as versões originais!"
 }
