@@ -2,9 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Cacycle",
-			"HenriqueCrang"
+			"HenriqueCrang",
+			"Eduardo Addad de Oliveira"
 		]
 	},
+	"wiked-diff-desc": "Motor de diferenças, de estilo em linha, com suporte de movimentação de blocos",
 	"wiked-diff-empty": "(Sem diferença)",
 	"wiked-diff-same": "Nenhuma diferença entre versões",
 	"wiked-diff-ins": "Inserido",
