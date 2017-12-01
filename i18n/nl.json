@@ -3,10 +3,11 @@
 		"authors": [
 			"Cacycle",
 			"Esketti",
-			"McDutchie"
+			"McDutchie",
+			"Mar(c)"
 		]
 	},
-	"wiked-diff-desc": "Verschillen tonen met ingebouwde stijl en ondersteuning voor het verplaatsen van blokken",
+	"wiked-diff-desc": "Tekstvergelijkingsengine met inline-weergave en ondersteuning voor blokverplaatsingen",
 	"wiked-diff-empty": "(geen verschil)",
 	"wiked-diff-same": "Geen verschil tussen de versies",
 	"wiked-diff-ins": "Ingevoegd",
