@@ -1,0 +1,34 @@
+{
+	"name": "wikEdDiff",
+	"version": "1.2.5",
+	"author": "Cacycle",
+	"url": "https://www.mediawiki.org/wiki/Extension:wikEdDiff",
+	"descriptionmsg": "wiked-diff-desc",
+	"license-name": "GPL-2.0+",
+	"type": "other",
+	"MessagesDirs": {
+		"WikEdDifferenceEngine": [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"WikEdDifferenceEngine": "WikEdDiff.body.php",
+		"WikEdDiff": "WikEdDiff.body.php",
+		"WikEdDiffText": "WikEdDiff.body.php"
+	},
+	"ResourceModules": {
+		"ext.wikEdDiff": {
+			"scripts": "ext.wikEdDiff.js",
+			"styles": "ext.wikEdDiff.css",
+			"position": "top"
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "modules",
+		"remoteExtPath": "WikEdDiff/modules"
+	},
+	"Hooks": {
+		"GetDifferenceEngine": "WikEdDifferenceEngine::onGetDifferenceEngine"
+	},
+	"manifest_version": 2
+}

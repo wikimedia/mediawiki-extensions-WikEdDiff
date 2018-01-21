@@ -23,31 +23,16 @@
  * @author Cacycle (https://en.wikipedia.org/wiki/User:Cacycle)
  */
 
-
-global $wgExtensionCredits, $wgResourceModules, $wgHooks;
-
-// extension credits
-$wgExtensionCredits['other'][] = array(
-	'path' => __FILE__,
-	'name' => 'wikEdDiff',
-	'author' => 'Cacycle',
-	'url' => 'https://www.mediawiki.org/wiki/Extension:wikEdDiff',
-	'descriptionmsg' => 'wiked-diff-desc',
-	'version' => '1.2.5',
-	'license-name' => 'GPL-2.0+' // GNU General Public License v2.0 or later
-);
-
-// hook up
-$dir = __DIR__ . '/';
-$wgResourceModules['ext.wikEdDiff'] = array(
-	'localBasePath' => $dir . 'modules',
-	'remoteExtPath' => 'WikEdDiff/modules',
-	'scripts' => 'ext.wikEdDiff.js',
-	'styles' => 'ext.wikEdDiff.css',
-	'position' => 'top'
-);
-$wgMessagesDirs['WikEdDifferenceEngine'] = $dir . 'i18n';
-$wgAutoloadClasses['WikEdDifferenceEngine'] = $dir . 'WikEdDiff.body.php';
-$wgAutoloadClasses['WikEdDiff'] = $dir . 'WikEdDiff.body.php';
-$wgAutoloadClasses['WikEdDiffText'] = $dir . 'WikEdDiff.body.php';
-$wgHooks['GetDifferenceEngine'][] = 'WikEdDifferenceEngine::onGetDifferenceEngine';
+ if ( function_exists( 'wfLoadExtension' ) ) {
+	wfLoadExtension( 'WikEdDiff' );
+	// Keep i18n globals so mergeMessageFileList.php doesn't break
+	$wgMessagesDirs['WikEdDiff'] = __DIR__ . '/i18n';
+	wfWarn(
+		'Deprecated PHP entry point used for the WikEdDiff extension. ' .
+		'Please use wfLoadExtension instead, ' .
+		'see https://www.mediawiki.org/wiki/Extension_registration for more details.'
+	);
+	return;
+} else {
+	die( 'This version of the WikEdDiff extension requires MediaWiki 1.29+' );
+}
