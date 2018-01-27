@@ -19,8 +19,7 @@
 	"ResourceModules": {
 		"ext.wikEdDiff": {
 			"scripts": "ext.wikEdDiff.js",
-			"styles": "ext.wikEdDiff.css",
-			"position": "top"
+			"styles": "ext.wikEdDiff.css"
 		}
 	},
 	"ResourceFileModulePaths": {
