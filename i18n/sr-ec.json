@@ -2,10 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Cacycle",
-			"Milicevic01"
+			"Milicevic01",
+			"Acamicamacaraca"
 		]
 	},
 	"wiked-diff-empty": "(Нема разлике)",
-	"wiked-diff-same": "Нема разлика између верзија",
+	"wiked-diff-same": "Нема разлика између измена",
 	"wiked-diff-del": "Обрисано"
 }
