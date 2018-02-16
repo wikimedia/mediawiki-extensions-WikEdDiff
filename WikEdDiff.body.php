@@ -184,7 +184,6 @@ class WikEdDifferenceEngine extends DifferenceEngine {
 	public function generateTextDiffBody ( $otext, $ntext ) {
 $this->debug( '$this->mDiffLang', $this->mDiffLang);
 		global $wgContLang, $wgOut;
-		wfProfileIn( __METHOD__ );
 
 		// Load js and css
 		$wgOut->addModules( 'ext.wikEdDiff' );
@@ -197,7 +196,6 @@ $this->debug( '$this->mDiffLang', $this->mDiffLang);
 
 		$diffEngine = new WikEdDiff();
 		$diffText = $wgContLang->unsegmentForDiff( $diffEngine->diff( $otext, $ntext ) );
-		wfProfileOut( __METHOD__ );
 		return $diffText;
 	}
 }
