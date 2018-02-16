@@ -8,5 +8,10 @@
 	},
 	"wiked-diff-empty": "(Нема разлике)",
 	"wiked-diff-same": "Нема разлика између измена",
-	"wiked-diff-del": "Обрисано"
+	"wiked-diff-ins": "Убачено",
+	"wiked-diff-del": "Обрисано",
+	"wiked-diff-block-left": "◀ Премештено",
+	"wiked-diff-block-right": "Премештено ▶",
+	"wiked-diff-block-left-nounicode": "< Премештено",
+	"wiked-diff-block-right-nounicode": "Премештено >"
 }
