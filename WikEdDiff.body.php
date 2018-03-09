@@ -138,7 +138,7 @@ class WikEdDifferenceEngine extends DifferenceEngine {
 	 *
 	 * // hook: get diff engine class name
 	 * $diffEngineClass = '';
-	 * if ( wfRunHooks( 'GetDiffEngineClass', array( $context, &$diffEngineClass ) ) ) {
+	 * if ( Hooks::run( 'GetDiffEngineClass', array( $context, &$diffEngineClass ) ) ) {
 	 *   // use default diff engine
 	 *   $diffEngineClass = $this->getDiffEngineClass();
 	 * }
