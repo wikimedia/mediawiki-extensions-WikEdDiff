@@ -2,13 +2,18 @@
 	"@metadata": {
 		"authors": [
 			"Cacycle",
-			"Liuxinyu970226"
+			"Liuxinyu970226",
+			"Kly"
 		]
 	},
+	"wiked-diff-desc": "支援區塊移動的行內樣式差異引擎",
 	"wiked-diff-empty": "（沒有差異）",
+	"wiked-diff-same": "版本間無差異",
+	"wiked-diff-ins": "已插入",
 	"wiked-diff-del": "已刪除",
 	"wiked-diff-block-left": "◀ 已移動",
 	"wiked-diff-block-right": "已移動 ▶",
 	"wiked-diff-block-left-nounicode": "< 已移動",
-	"wiked-diff-block-right-nounicode": "已移動 >"
+	"wiked-diff-block-right-nounicode": "已移動 >",
+	"wiked-diff-error": "錯誤：wikEdDiff 輸出內容不符合原有版本！"
 }
