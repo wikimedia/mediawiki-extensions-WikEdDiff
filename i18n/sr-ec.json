@@ -3,10 +3,11 @@
 		"authors": [
 			"Cacycle",
 			"Milicevic01",
-			"Acamicamacaraca"
+			"Acamicamacaraca",
+			"BadDog"
 		]
 	},
-	"wiked-diff-empty": "(Нема разлике)",
+	"wiked-diff-empty": "(нема разлике)",
 	"wiked-diff-same": "Нема разлика између измена",
 	"wiked-diff-ins": "Убачено",
 	"wiked-diff-del": "Обрисано",
