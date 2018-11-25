@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Red Winged Duck"
 		]
 	},
+	"wiked-diff-desc": "Інструмэнт убудаванага параўнаньня з падтрымкай перамяшчэньня блёкаў",
 	"wiked-diff-empty": "(Розьніцы няма)"
 }
