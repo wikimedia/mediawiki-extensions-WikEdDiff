@@ -12,5 +12,7 @@
 	"wiked-diff-del": "Выдалена",
 	"wiked-diff-block-left": "◀ Перасунута",
 	"wiked-diff-block-right": "Перасунута ▶",
-	"wiked-diff-block-left-nounicode": "< Перасунута"
+	"wiked-diff-block-left-nounicode": "< Перасунута",
+	"wiked-diff-block-right-nounicode": "Перасунута >",
+	"wiked-diff-error": "Памылка: вынік wikEdDiff не адпавядае арыгінальным вэрсіям!"
 }
