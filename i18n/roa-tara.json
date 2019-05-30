@@ -1,8 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Joetaras"
 		]
 	},
-	"wiked-diff-empty": "(Nisciuna differenze)"
+	"wiked-diff-desc": "Motore de differenze cu stile lineare cu supporte a 'u spustamende in blocche",
+	"wiked-diff-empty": "(Nisciuna differenze)",
+	"wiked-diff-same": "Nisciuna differenze 'mbrà versiune",
+	"wiked-diff-ins": "'Nzerite",
+	"wiked-diff-del": "Scangellate",
+	"wiked-diff-block-left": "◀ Spustate",
+	"wiked-diff-block-right": "Spustate ▶",
+	"wiked-diff-block-left-nounicode": "< Spustate",
+	"wiked-diff-block-right-nounicode": "Spustate >",
+	"wiked-diff-error": "Errore: resultate wikEdDiff non coerende cu le versiune origgenale!"
 }
