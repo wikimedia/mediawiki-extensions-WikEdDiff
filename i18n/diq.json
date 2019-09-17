@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Mirzali"
 		]
 	},
-	"wiked-diff-empty": "(Babetna niyo)"
+	"wiked-diff-empty": "(Babetna niyo)",
+	"wiked-diff-del": "Esteriya"
 }
