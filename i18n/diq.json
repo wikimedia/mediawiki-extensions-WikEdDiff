@@ -6,5 +6,9 @@
 		]
 	},
 	"wiked-diff-empty": "(Babetna niyo)",
-	"wiked-diff-del": "Esteriya"
+	"wiked-diff-del": "Esteriya",
+	"wiked-diff-block-left": "◀ Kırışt",
+	"wiked-diff-block-right": "Kırışt ▶",
+	"wiked-diff-block-left-nounicode": "< Kırışt",
+	"wiked-diff-block-right-nounicode": "Kırışt >"
 }
