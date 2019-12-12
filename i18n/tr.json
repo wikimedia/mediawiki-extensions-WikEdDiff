@@ -1,8 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"BaRaN6161 TURK"
 		]
 	},
-	"wiked-diff-empty": "(Fark yok)"
+	"wiked-diff-desc": "Blok hareket desteği ile sıralı stil farkı motoru",
+	"wiked-diff-empty": "(Fark yok)",
+	"wiked-diff-same": "Sürümler arasında fark yok",
+	"wiked-diff-ins": "Eklenmiş",
+	"wiked-diff-del": "Silindi",
+	"wiked-diff-block-left": "◀ Taşındı",
+	"wiked-diff-block-right": "Taşındı ▶",
+	"wiked-diff-block-left-nounicode": "< Taşındı",
+	"wiked-diff-block-right-nounicode": "Taşındı >",
+	"wiked-diff-error": "Hata: wikEdDiff çıktısı orijinal sürümlerle tutarlı değil!"
 }
