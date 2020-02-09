@@ -6,20 +6,19 @@
 
 .wikEdDiffInsert {
 	font-weight: bold;
-	background-color: #bbddff;
+	background-color: #bdf;
 	color: #222;
 	border-radius: 0.25em;
 	padding: 0.2em 1px;
 }
 
 .wikEdDiffInsertBlank {
-	background-color: #66bbff;
+	background-color: #6bf;
 }
 
 .wikEdDiffFragment:hover .wikEdDiffInsertBlank {
-	background-color: #bbddff;
+	background-color: #bdf;
 }
-
 
 /* delete */
 
@@ -39,7 +38,6 @@
 	background-color: #ffe49c;
 }
 
-
 /* block */
 
 .wikEdDiffBlock {
@@ -48,9 +46,6 @@
 	border-radius: 0.25em;
 	padding: 0.2em 1px;
 	margin: 0 1px;
-}
-
-.wikEdDiffBlock {
 }
 
 .wikEdDiffBlock0 {
@@ -74,7 +69,7 @@
 }
 
 .wikEdDiffBlock5 {
-	background-color: #bbccff;
+	background-color: #bcf;
 }
 
 .wikEdDiffBlock6 {
@@ -82,7 +77,7 @@
 }
 
 .wikEdDiffBlock7 {
-	background-color: #ffbbbb;
+	background-color: #fbb;
 }
 
 .wikEdDiffBlock8 {
@@ -96,10 +91,10 @@
 	border-width: 1px 0;
 }
 
-
 /* mark */
 
-.wikEdDiffMarkLeft, .wikEdDiffMarkRight {
+.wikEdDiffMarkLeft,
+.wikEdDiffMarkRight {
 	font-weight: bold;
 	background-color: #ffe49c;
 	color: #666;
@@ -170,11 +165,7 @@
 	color: #fff;
 }
 
-
 /* wrappers */
-
-.wikEdDiffContainer {
-	}
 
 .wikEdDiffFragment {
 	white-space: pre-wrap;
@@ -208,10 +199,6 @@
 	margin-bottom: 1em;
 }
 
-.wikEdDiffOmittedChars {
-}
-
-
 /* newline */
 
 .wikEdDiffNewline:before {
@@ -231,14 +218,15 @@
 	color: #ccc;
 }
 
-.wikEdDiffBlockHighlight:hover .wikEdDiffInsert .wikEdDiffNewline:before, .wikEdDiffInsert:hover .wikEdDiffNewline:before {
+.wikEdDiffBlockHighlight:hover .wikEdDiffInsert .wikEdDiffNewline:before,
+.wikEdDiffInsert:hover .wikEdDiffNewline:before {
 	color: #999;
 }
 
-.wikEdDiffBlockHighlight:hover .wikEdDiffDelete .wikEdDiffNewline:before, .wikEdDiffDelete:hover .wikEdDiffNewline:before {
+.wikEdDiffBlockHighlight:hover .wikEdDiffDelete .wikEdDiffNewline:before,
+.wikEdDiffDelete:hover .wikEdDiffNewline:before {
 	color: #aaa;
 }
-
 
 /* tab */
 
@@ -273,7 +261,6 @@
 	color: #bbb;
 }
 
-
 /* space */
 
 .wikEdDiffSpace {
@@ -303,17 +290,19 @@
 	color: #ddd;
 }
 
-.wikEdDiffBlockHighlight:hover .wikEdDiffInsert .wikEdDiffSpaceSymbol:before, .wikEdDiffInsert:hover .wikEdDiffSpaceSymbol:before {
+.wikEdDiffBlockHighlight:hover .wikEdDiffInsert .wikEdDiffSpaceSymbol:before,
+.wikEdDiffInsert:hover .wikEdDiffSpaceSymbol:before {
 	color: #888;
 }
 
-.wikEdDiffBlockHighlight:hover .wikEdDiffDelete .wikEdDiffSpaceSymbol:before, .wikEdDiffDelete:hover .wikEdDiffSpaceSymbol:before {
+.wikEdDiffBlockHighlight:hover .wikEdDiffDelete .wikEdDiffSpaceSymbol:before,
+.wikEdDiffDelete:hover .wikEdDiffSpaceSymbol:before {
 	color: #999;
 }
 
-
 /* error */
 
-.wikEdDiffError .wikEdDiffFragment, .wikEdDiffError .wikEdDiffNoChange {
+.wikEdDiffError .wikEdDiffFragment,
+.wikEdDiffError .wikEdDiffNoChange {
 	background: #faa;
 }

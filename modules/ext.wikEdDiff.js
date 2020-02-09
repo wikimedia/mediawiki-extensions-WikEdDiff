@@ -1,10 +1,9 @@
-﻿/*
+/*
  * wikEdDiff: inline-style difference engine with block move support
  */
 
-
 /*
- * Event handler for wikEdDiff. 
+ * Event handler for wikEdDiff.
  * Highlights corresponding block and mark elements on hover and jumps between on click.
  * Code for use in non-jQuery environments and legacy browsers (at least IE 8 compatible).
  *
@@ -20,9 +19,9 @@ window.wikEdDiffBlockHandlerExt = function ( event, element, type ) {
 	}
 
 	// Get mark/block elements
-	var number = element.id.replace( /\D/g, '' );
-	var block = document.getElementById( 'wikEdDiffBlockExt' + number );
-	var mark = document.getElementById( 'wikEdDiffMarkExt' + number );
+	var number = element.id.replace( /\D/g, '' ),
+		block = document.getElementById( 'wikEdDiffBlockExt' + number ),
+		mark = document.getElementById( 'wikEdDiffMarkExt' + number );
 	if ( block === null || mark === null ) {
 		return;
 	}
@@ -55,15 +54,14 @@ window.wikEdDiffBlockHandlerExt = function ( event, element, type ) {
 			// GetElementsByClassName
 			var container = document.getElementById( 'wikEdDiffContainer' );
 			if ( container !== null ) {
-				var spans = container.getElementsByTagName( 'span' );
-				var spansLength = spans.length;
-				for ( var i = 0; i < spansLength; i ++ ) {
-					if ( spans[i] !== block && spans[i] !== mark ) {
-						if ( spans[i].className.indexOf( ' wikEdDiffBlockHighlight' ) !== -1 ) {
-							spans[i].className = spans[i].className.replace( / wikEdDiffBlockHighlight/g, '' );
-						}
-						else if ( spans[i].className.indexOf( ' wikEdDiffMarkHighlight') !== -1 ) {
-							spans[i].className = spans[i].className.replace( / wikEdDiffMarkHighlight/g, '' );
+				var spans = container.getElementsByTagName( 'span' ),
+					spansLength = spans.length;
+				for ( var i = 0; i < spansLength; i++ ) {
+					if ( spans[ i ] !== block && spans[ i ] !== mark ) {
+						if ( spans[ i ].className.indexOf( ' wikEdDiffBlockHighlight' ) !== -1 ) {
+							spans[ i ].className = spans[ i ].className.replace( / wikEdDiffBlockHighlight/g, '' );
+						} else if ( spans[ i ].className.indexOf( ' wikEdDiffMarkHighlight' ) !== -1 ) {
+							spans[ i ].className = spans[ i ].className.replace( / wikEdDiffMarkHighlight/g, '' );
 						}
 					}
 				}
@@ -78,14 +76,13 @@ window.wikEdDiffBlockHandlerExt = function ( event, element, type ) {
 		var corrElement;
 		if ( element === block ) {
 			corrElement = mark;
-		}
-		else {
+		} else {
 			corrElement = block;
 		}
 
 		// Get element height (getOffsetTop)
-		var corrElementPos = 0;
-		var node = corrElement;
+		var corrElementPos = 0,
+			node = corrElement;
 		do {
 			corrElementPos += node.offsetTop;
 		} while ( ( node = node.offsetParent ) !== null );
@@ -94,8 +91,7 @@ window.wikEdDiffBlockHandlerExt = function ( event, element, type ) {
 		var top;
 		if ( window.pageYOffset !== undefined ) {
 			top = window.pageYOffset;
-		}
-		else {
+		} else {
 			top = document.documentElement.scrollTop;
 		}
 
@@ -103,8 +99,7 @@ window.wikEdDiffBlockHandlerExt = function ( event, element, type ) {
 		var cursor;
 		if ( event.pageY !== undefined ) {
 			cursor = event.pageY;
-		}
-		else if ( event.clientY !== undefined ) {
+		} else if ( event.clientY !== undefined ) {
 			cursor = event.clientY + top;
 		}
 
