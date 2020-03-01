@@ -16,8 +16,8 @@
 	},
 	"AutoloadClasses": {
 		"WikEdDifferenceEngine": "includes/WikEdDifferenceEngine.php",
-		"WikEdDiff": "includes/WikEdDifferenceEngine.php",
-		"WikEdDiffText": "includes/WikEdDifferenceEngine.php"
+		"WikEdDiff": "includes/WikEdDiff.php",
+		"WikEdDiffText": "includes/WikEdDiffText.php"
 	},
 	"ResourceModules": {
 		"ext.wikEdDiff": {
