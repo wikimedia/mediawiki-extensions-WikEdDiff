@@ -3,9 +3,9 @@
 		"authors": [
 			"Cacycle",
 			"Crochet.david",
-			"Wladek92",
 			"Gomoko",
-			"Urhixidur"
+			"Urhixidur",
+			"Wladek92"
 		]
 	},
 	"wiked-diff-desc": "Moteur de différence de style interne avec prise en charge du déplacement de blocs",

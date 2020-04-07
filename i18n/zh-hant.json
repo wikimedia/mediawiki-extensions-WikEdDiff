@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Cacycle",
-			"Liuxinyu970226",
-			"Kly"
+			"Kly",
+			"Liuxinyu970226"
 		]
 	},
 	"wiked-diff-desc": "支援區塊移動的行內樣式差異引擎",

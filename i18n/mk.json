@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle",
-			"Bjankuloski06"
+			"Bjankuloski06",
+			"Cacycle"
 		]
 	},
 	"wiked-diff-desc": "Вграден механизам во редови за споредба на разлики со поддршка за преместување на блокирања",
