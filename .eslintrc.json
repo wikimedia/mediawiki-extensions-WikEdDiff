@@ -10,6 +10,7 @@
 	},
 	"rules": {
 		"one-var": "off",
-		"vars-on-top": "off"
+		"vars-on-top": "off",
+		"no-shadow": "warn"
 	}
 }
