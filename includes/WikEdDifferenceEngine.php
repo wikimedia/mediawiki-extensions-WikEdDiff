@@ -118,6 +118,7 @@
  * @author Cacycle (https://en.wikipedia.org/wiki/User:Cacycle)
  */
 
+use MediaWiki\MediaWikiServices;
 
 /**
  * Difference engine interface to be used with wikEd diff.
@@ -183,7 +184,7 @@ class WikEdDifferenceEngine extends DifferenceEngine {
 	 */
 	public function generateTextDiffBody ( $otext, $ntext ) {
 $this->debug( '$this->mDiffLang', $this->mDiffLang);
-		global $wgContLang, $wgOut;
+		global $wgOut;
 
 		// Load js and css
 		$wgOut->addModules( 'ext.wikEdDiff' );
@@ -191,11 +192,12 @@ $this->debug( '$this->mDiffLang', $this->mDiffLang);
 		$otext = str_replace( "\r\n", "\n", $otext );
 		$ntext = str_replace( "\r\n", "\n", $ntext );
 
-		$otext = $wgContLang->segmentForDiff( $otext );
-		$ntext = $wgContLang->segmentForDiff( $ntext );
+		$contentLanguage = MediaWikiServices::getInstance()->getContentLanguage();
+		$otext = $contentLanguage->segmentForDiff( $otext );
+		$ntext = $contentLanguage->segmentForDiff( $ntext );
 
 		$diffEngine = new WikEdDiff();
-		$diffText = $wgContLang->unsegmentForDiff( $diffEngine->diff( $otext, $ntext ) );
+		$diffText = $contentLanguage->unsegmentForDiff( $diffEngine->diff( $otext, $ntext ) );
 		return $diffText;
 	}
 }
