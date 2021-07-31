@@ -6,7 +6,6 @@
 		"wikimedia/mediawiki"
 	],
 	"rules": {
-		"vars-on-top": "off",
 		"no-shadow": "warn",
 		"mediawiki/class-doc": "warn"
 	}
