@@ -23,7 +23,7 @@ Installation:
 2. Add the following code to /LocalSettings.php:
 
 	# wikEdDiff: inline-style difference engine with block move support
-	require_once "$IP/extensions/WikEdDiff/WikEdDiff.php";
+	wfLoadExtension( 'WikEdDiff' );
 
 3. Optionally add the following customization options to /LocalSettings.php (set to defaults):
 
