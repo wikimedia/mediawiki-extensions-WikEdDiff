@@ -3,7 +3,8 @@
 		"authors": [
 			"Ainali",
 			"Cacycle",
-			"Jopparn"
+			"Jopparn",
+			"Sabelöga"
 		]
 	},
 	"wiked-diff-empty": "(Ingen skillnad)",
@@ -13,5 +14,6 @@
 	"wiked-diff-block-left": "◀ Flyttad",
 	"wiked-diff-block-right": "Flyttad ▶",
 	"wiked-diff-block-left-nounicode": "< Flyttad",
-	"wiked-diff-block-right-nounicode": "Flyttad >"
+	"wiked-diff-block-right-nounicode": "Flyttad >",
+	"wiked-diff-error": "Fel: wikEdDiff-resultatet stämmer inte med originalversionerna!"
 }
