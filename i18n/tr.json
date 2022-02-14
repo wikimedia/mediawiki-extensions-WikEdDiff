@@ -3,12 +3,13 @@
 		"authors": [
 			"BaRaN6161 TURK",
 			"Cacycle",
-			"MuratTheTurkish"
+			"MuratTheTurkish",
+			"SaldırganSincap"
 		]
 	},
 	"wiked-diff-desc": "Blok hareket desteği ile sıralı stil farkı motoru",
 	"wiked-diff-empty": "(Fark yok)",
-	"wiked-diff-same": "Sürümler arasında fark yok",
+	"wiked-diff-same": "Revizyonlar arasında fark yok",
 	"wiked-diff-ins": "Eklenmiş",
 	"wiked-diff-del": "Silindi",
 	"wiked-diff-block-left": "◀ Taşındı",
