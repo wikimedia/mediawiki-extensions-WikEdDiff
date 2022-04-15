@@ -1,4 +1,5 @@
 {
+	"name": "WikEdDiff",
 	"private": true,
 	"scripts": {
 		"test": "grunt test"
