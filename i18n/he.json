@@ -3,9 +3,11 @@
 		"authors": [
 			"Cacycle",
 			"Guycn2",
-			"תומר ט"
+			"תומר ט",
+			"Amire80"
 		]
 	},
+	"wiked-diff-desc": "מנוע הבדלים בסגנון מוטבע עם תמיכה בהעברת גושים",
 	"wiked-diff-empty": "(אין הבדלים)",
 	"wiked-diff-same": "אין הבדל בין הגרסאות",
 	"wiked-diff-ins": "נוסף",
