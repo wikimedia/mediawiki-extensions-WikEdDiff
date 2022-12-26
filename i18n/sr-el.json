@@ -5,7 +5,12 @@
 			"Milicevic01"
 		]
 	},
-	"wiked-diff-empty": "(Nema razlike)",
-	"wiked-diff-same": "Nema razlika između verzija",
-	"wiked-diff-del": "Obrisano"
+	"wiked-diff-empty": "(nema razlike)",
+	"wiked-diff-same": "Nema razlika između izmena",
+	"wiked-diff-ins": "Ubačeno",
+	"wiked-diff-del": "Obrisano",
+	"wiked-diff-block-left": "◀ Premešteno",
+	"wiked-diff-block-right": "Premešteno ▶",
+	"wiked-diff-block-left-nounicode": "< Premešteno",
+	"wiked-diff-block-right-nounicode": "Premešteno >"
 }
