@@ -5,6 +5,14 @@
 			"Eleassar"
 		]
 	},
+	"wiked-diff-desc": "Mehanizem razlikovanja internega sloga s podporo za prestavljanje blokov",
 	"wiked-diff-empty": "(ni razlike)",
-	"wiked-diff-del": "Izbrisano"
+	"wiked-diff-same": "Med redakcijama ni razlike",
+	"wiked-diff-ins": "Vstavljeno",
+	"wiked-diff-del": "Izbrisano",
+	"wiked-diff-block-left": "◀ Prestavljen",
+	"wiked-diff-block-right": "Prestavljen ▶",
+	"wiked-diff-block-left-nounicode": "< Prestavljen",
+	"wiked-diff-block-right-nounicode": "Prestavljen >",
+	"wiked-diff-error": "Napaka: Izhod wikEdDiff se ne sklada z izvornimi redakcijami!"
 }
