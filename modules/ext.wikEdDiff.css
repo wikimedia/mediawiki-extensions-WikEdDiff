@@ -103,19 +103,19 @@
 	margin: 0 1px;
 }
 
-.wikEdDiffMarkLeft:before {
+.wikEdDiffMarkLeft::before {
 	content: "◀";
 }
 
-.wikEdDiffMarkRight:before {
+.wikEdDiffMarkRight::before {
 	content: "▶";
 }
 
-.wikEdDiffMarkLeft.wikEdDiffNoUnicode:before {
+.wikEdDiffMarkLeft.wikEdDiffNoUnicode::before {
 	content: "<";
 }
 
-.wikEdDiffMarkRight.wikEdDiffNoUnicode:before {
+.wikEdDiffMarkRight.wikEdDiffNoUnicode::before {
 	content: ">";
 }
 
@@ -201,30 +201,30 @@
 
 /* newline */
 
-.wikEdDiffNewline:before {
+.wikEdDiffNewline::before {
 	content: "¶";
 	color: transparent;
 }
 
-.wikEdDiffBlock:hover .wikEdDiffNewline:before {
+.wikEdDiffBlock:hover .wikEdDiffNewline::before {
 	color: #aaa;
 }
 
-.wikEdDiffBlockHighlight .wikEdDiffNewline:before {
+.wikEdDiffBlockHighlight .wikEdDiffNewline::before {
 	color: transparent;
 }
 
-.wikEdDiffBlockHighlight:hover .wikEdDiffNewline:before {
+.wikEdDiffBlockHighlight:hover .wikEdDiffNewline::before {
 	color: #ccc;
 }
 
-.wikEdDiffBlockHighlight:hover .wikEdDiffInsert .wikEdDiffNewline:before,
-.wikEdDiffInsert:hover .wikEdDiffNewline:before {
+.wikEdDiffBlockHighlight:hover .wikEdDiffInsert .wikEdDiffNewline::before,
+.wikEdDiffInsert:hover .wikEdDiffNewline::before {
 	color: #999;
 }
 
-.wikEdDiffBlockHighlight:hover .wikEdDiffDelete .wikEdDiffNewline:before,
-.wikEdDiffDelete:hover .wikEdDiffNewline:before {
+.wikEdDiffBlockHighlight:hover .wikEdDiffDelete .wikEdDiffNewline::before,
+.wikEdDiffDelete:hover .wikEdDiffNewline::before {
 	color: #aaa;
 }
 
@@ -239,25 +239,25 @@
 	top: -0.2em;
 }
 
-.wikEdDiffTabSymbol:before {
+.wikEdDiffTabSymbol::before {
 	content: "→";
 	font-size: smaller;
 	color: #ccc;
 }
 
-.wikEdDiffBlock .wikEdDiffTabSymbol:before {
+.wikEdDiffBlock .wikEdDiffTabSymbol::before {
 	color: #aaa;
 }
 
-.wikEdDiffBlockHighlight .wikEdDiffTabSymbol:before {
+.wikEdDiffBlockHighlight .wikEdDiffTabSymbol::before {
 	color: #aaa;
 }
 
-.wikEdDiffInsert .wikEdDiffTabSymbol:before {
+.wikEdDiffInsert .wikEdDiffTabSymbol::before {
 	color: #aaa;
 }
 
-.wikEdDiffDelete .wikEdDiffTabSymbol:before {
+.wikEdDiffDelete .wikEdDiffTabSymbol::before {
 	color: #bbb;
 }
 
@@ -273,30 +273,30 @@
 	left: -0.05em;
 }
 
-.wikEdDiffSpaceSymbol:before {
+.wikEdDiffSpaceSymbol::before {
 	content: "·";
 	color: transparent;
 }
 
-.wikEdDiffBlock:hover .wikEdDiffSpaceSymbol:before {
+.wikEdDiffBlock:hover .wikEdDiffSpaceSymbol::before {
 	color: #999;
 }
 
-.wikEdDiffBlockHighlight .wikEdDiffSpaceSymbol:before {
+.wikEdDiffBlockHighlight .wikEdDiffSpaceSymbol::before {
 	color: transparent;
 }
 
-.wikEdDiffBlockHighlight:hover .wikEdDiffSpaceSymbol:before {
+.wikEdDiffBlockHighlight:hover .wikEdDiffSpaceSymbol::before {
 	color: #ddd;
 }
 
-.wikEdDiffBlockHighlight:hover .wikEdDiffInsert .wikEdDiffSpaceSymbol:before,
-.wikEdDiffInsert:hover .wikEdDiffSpaceSymbol:before {
+.wikEdDiffBlockHighlight:hover .wikEdDiffInsert .wikEdDiffSpaceSymbol::before,
+.wikEdDiffInsert:hover .wikEdDiffSpaceSymbol::before {
 	color: #888;
 }
 
-.wikEdDiffBlockHighlight:hover .wikEdDiffDelete .wikEdDiffSpaceSymbol:before,
-.wikEdDiffDelete:hover .wikEdDiffSpaceSymbol:before {
+.wikEdDiffBlockHighlight:hover .wikEdDiffDelete .wikEdDiffSpaceSymbol::before,
+.wikEdDiffDelete:hover .wikEdDiffSpaceSymbol::before {
 	color: #999;
 }
 
