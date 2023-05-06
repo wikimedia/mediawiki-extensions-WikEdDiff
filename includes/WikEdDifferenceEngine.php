@@ -131,21 +131,6 @@ class WikEdDifferenceEngine extends DifferenceEngine {
 
 	/**
 	 * GetDiffEngineClass hook handler.
-	 * MediaWiki versions before 1.25 require a patch to core: replace the content of
-	 *   function createDifferenceEngine in includes/content/ContentHandler.php
-	 *   with the following code:
-	 *
-	 * @code
-	 *
-	 * // hook: get diff engine class name
-	 * $diffEngineClass = '';
-	 * if ( Hooks::run( 'GetDiffEngineClass', array( $context, &$diffEngineClass ) ) ) {
-	 *   // use default diff engine
-	 *   $diffEngineClass = $this->getDiffEngineClass();
-	 * }
-	 * return new $diffEngineClass( $context, $old, $new, $rcid, $refreshCache, $unhide );
-	 *
-	 * @endcode
 	 *
 	 * @param IContextSource $context Context to be used
 	 * @param[out] string $diffEngine Class name of diff engine to be used for diff

@@ -8,24 +8,12 @@ This extension requires PHP 5.3+ and MediaWiki 1.17+.
 
 Installation:
 
-1. MediaWiki versions before 1.25 require a patch to core: replace the content of
-  function createDifferenceEngine in includes/content/ContentHandler.php
-  with the following code:
-
-	// hook: get diff engine class name
-	$diffEngineClass = '';
-	if ( Hooks::run( 'GetDiffEngineClass', array( $context, &$diffEngineClass ) ) ) {
-		// use default diff engine
-		$diffEngineClass = $this->getDiffEngineClass();
-	}
-	return new $diffEngineClass( $context, $old, $new, $rcid, $refreshCache, $unhide );
-
-2. Add the following code to /LocalSettings.php:
+1. Add the following code to /LocalSettings.php:
 
 	# wikEdDiff: inline-style difference engine with block move support
 	wfLoadExtension( 'WikEdDiff' );
 
-3. Optionally add the following customization options to /LocalSettings.php (set to defaults):
+2. Optionally add the following customization options to /LocalSettings.php (set to defaults):
 
 	# Show complete un-clipped diff text (false)
 	$wgWikEdDiffFullDiff = false;
