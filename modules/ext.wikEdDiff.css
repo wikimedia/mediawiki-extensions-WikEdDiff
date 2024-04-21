@@ -104,19 +104,19 @@
 }
 
 .wikEdDiffMarkLeft::before {
-	content: "◀";
+	content: '◀';
 }
 
 .wikEdDiffMarkRight::before {
-	content: "▶";
+	content: '▶';
 }
 
 .wikEdDiffMarkLeft.wikEdDiffNoUnicode::before {
-	content: "<";
+	content: '<';
 }
 
 .wikEdDiffMarkRight.wikEdDiffNoUnicode::before {
-	content: ">";
+	content: '>';
 }
 
 .wikEdDiffMark {
@@ -202,7 +202,7 @@
 /* newline */
 
 .wikEdDiffNewline::before {
-	content: "¶";
+	content: '¶';
 	color: transparent;
 }
 
@@ -240,7 +240,7 @@
 }
 
 .wikEdDiffTabSymbol::before {
-	content: "→";
+	content: '→';
 	font-size: smaller;
 	color: #ccc;
 }
@@ -274,7 +274,7 @@
 }
 
 .wikEdDiffSpaceSymbol::before {
-	content: "·";
+	content: '·';
 	color: transparent;
 }
 
