@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Don Alessandro"
+		]
+	},
+	"wiked-diff-empty": "(Farq yoq)",
+	"wiked-diff-same": "Versiyalar arasında farq yoq",
+	"wiked-diff-ins": "Qoşulğan",
+	"wiked-diff-del": "Yoq etildi",
+	"wiked-diff-block-left": "◀ Taşıldı",
+	"wiked-diff-block-right": "Taşıldı ▶",
+	"wiked-diff-block-left-nounicode": "< Taşıldı",
+	"wiked-diff-block-right-nounicode": "Taşıldı >"
+}
