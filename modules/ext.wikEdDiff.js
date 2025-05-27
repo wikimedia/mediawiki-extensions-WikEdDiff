@@ -19,7 +19,7 @@ window.wikEdDiffBlockHandlerExt = function ( event, element, type ) {
 	}
 
 	// Get mark/block elements
-	var number = element.id.replace( /\D/g, '' ),
+	const number = element.id.replace( /\D/g, '' ),
 		block = document.getElementById( 'wikEdDiffBlockExt' + number ),
 		mark = document.getElementById( 'wikEdDiffMarkExt' + number );
 	if ( block === null || mark === null ) {
@@ -52,15 +52,15 @@ window.wikEdDiffBlockHandlerExt = function ( event, element, type ) {
 			mark.className = mark.className.replace( / wikEdDiffMarkHighlight/g, '' );
 
 			// GetElementsByClassName
-			var container = document.getElementById( 'wikEdDiffContainer' );
+			const container = document.getElementById( 'wikEdDiffContainer' );
 			if ( container !== null ) {
-				var spans = container.getElementsByTagName( 'span' ),
+				const spans = container.getElementsByTagName( 'span' ),
 					spansLength = spans.length;
-				for ( var i = 0; i < spansLength; i++ ) {
+				for ( let i = 0; i < spansLength; i++ ) {
 					if ( spans[ i ] !== block && spans[ i ] !== mark ) {
-						if ( spans[ i ].className.indexOf( ' wikEdDiffBlockHighlight' ) !== -1 ) {
+						if ( spans[ i ].className.includes( ' wikEdDiffBlockHighlight' ) ) {
 							spans[ i ].className = spans[ i ].className.replace( / wikEdDiffBlockHighlight/g, '' );
-						} else if ( spans[ i ].className.indexOf( ' wikEdDiffMarkHighlight' ) !== -1 ) {
+						} else if ( spans[ i ].className.includes( ' wikEdDiffMarkHighlight' ) ) {
 							spans[ i ].className = spans[ i ].className.replace( / wikEdDiffMarkHighlight/g, '' );
 						}
 					}
@@ -73,7 +73,7 @@ window.wikEdDiffBlockHandlerExt = function ( event, element, type ) {
 	if ( type === 'click' ) {
 
 		// Get corresponding element
-		var corrElement;
+		let corrElement;
 		if ( element === block ) {
 			corrElement = mark;
 		} else {
@@ -81,14 +81,14 @@ window.wikEdDiffBlockHandlerExt = function ( event, element, type ) {
 		}
 
 		// Get element height (getOffsetTop)
-		var corrElementPos = 0,
+		let corrElementPos = 0,
 			node = corrElement;
 		do {
 			corrElementPos += node.offsetTop;
 		} while ( ( node = node.offsetParent ) !== null );
 
 		// Get scroll height
-		var top;
+		let top;
 		if ( window.pageYOffset !== undefined ) {
 			top = window.pageYOffset;
 		} else {
@@ -96,7 +96,7 @@ window.wikEdDiffBlockHandlerExt = function ( event, element, type ) {
 		}
 
 		// Get cursor pos
-		var cursor;
+		let cursor;
 		if ( event.pageY !== undefined ) {
 			cursor = event.pageY;
 		} else if ( event.clientY !== undefined ) {
@@ -104,7 +104,7 @@ window.wikEdDiffBlockHandlerExt = function ( event, element, type ) {
 		}
 
 		// Get line height
-		var line = 12;
+		let line = 12;
 		if ( window.getComputedStyle !== undefined ) {
 			line = parseInt( window.getComputedStyle( corrElement ).getPropertyValue( 'line-height' ) );
 		}
