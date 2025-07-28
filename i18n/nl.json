@@ -7,7 +7,7 @@
 			"McDutchie"
 		]
 	},
-	"wiked-diff-desc": "Tekstvergelijkingsengine met inline-weergave en ondersteuning voor blokverplaatsingen",
+	"wiked-diff-desc": "Geeft de verschillen tussen pagina’s geïntegreerd weer met ondersteuning voor het verplaatsen van blokken",
 	"wiked-diff-empty": "(geen verschil)",
 	"wiked-diff-same": "Geen verschil tussen versies",
 	"wiked-diff-ins": "Ingevoegd",
