@@ -4,9 +4,11 @@
 			"Ainali",
 			"Cacycle",
 			"Jopparn",
-			"Sabelöga"
+			"Sabelöga",
+			"Stefan2255"
 		]
 	},
+	"wiked-diff-desc": "Inline-style differensmotor med stöd för blockförflyttning",
 	"wiked-diff-empty": "(Ingen skillnad)",
 	"wiked-diff-same": "Ingen skillnad mellan versioner",
 	"wiked-diff-ins": "Infogad",
