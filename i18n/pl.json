@@ -3,14 +3,17 @@
 		"authors": [
 			"Cacycle",
 			"Chrumps",
-			"Py64"
+			"Py64",
+			"Woytecr"
 		]
 	},
+	"wiked-diff-desc": "Mechanizm wyświetlania porównania zmian z widokiem liniowym i obsługą przeniesień bloków",
 	"wiked-diff-empty": "(Brak różnic)",
 	"wiked-diff-same": "Nie ma różnicy pomiędzy wersjami",
 	"wiked-diff-ins": "Wprowadzony",
 	"wiked-diff-del": "Usunięty",
-	"wiked-diff-block-left": "Przeniesione",
-	"wiked-diff-block-right": "Przeniesiony",
-	"wiked-diff-block-left-nounicode": "Przeniesiony"
+	"wiked-diff-block-left": "◀ Przeniesione",
+	"wiked-diff-block-right": "Przeniesiony ▶",
+	"wiked-diff-block-left-nounicode": "Przeniesiony",
+	"wiked-diff-block-right-nounicode": "Przeniesiony >"
 }
