@@ -2,9 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Cacycle",
-			"Hwangjy9"
+			"Hwangjy9",
+			"Tensama0415"
 		]
 	},
+	"wiked-diff-desc": "블록 이동을 지원하는 인라인 방식 차이 엔진",
 	"wiked-diff-empty": "(차이 없음)",
 	"wiked-diff-same": "버전 사이에 차이가 없음",
 	"wiked-diff-ins": "삽입함",
@@ -12,5 +14,6 @@
 	"wiked-diff-block-left": "◀ 이동함",
 	"wiked-diff-block-right": "이동함 ▶",
 	"wiked-diff-block-left-nounicode": "< 이동함",
-	"wiked-diff-block-right-nounicode": "이동함 >"
+	"wiked-diff-block-right-nounicode": "이동함 >",
+	"wiked-diff-error": "오류: wikEdDiff 출력 결과가 원본 버전과 일치하지 않습니다!"
 }
