@@ -4,7 +4,8 @@
 			"Cacycle",
 			"Esketti",
 			"Mar(c)",
-			"McDutchie"
+			"McDutchie",
+			"Siebrand"
 		]
 	},
 	"wiked-diff-desc": "Geeft de verschillen tussen pagina’s geïntegreerd weer met ondersteuning voor het verplaatsen van blokken",
@@ -16,5 +17,5 @@
 	"wiked-diff-block-right": "Verplaatst ▶",
 	"wiked-diff-block-left-nounicode": "< Verplaatst",
 	"wiked-diff-block-right-nounicode": "Verplaatst >",
-	"wiked-diff-error": "Fout: de uitvoer van wikEdDiff komt niet overeen met de originele versies!"
+	"wiked-diff-error": "Fout: de uitvoer van wikEdDiff komt niet overeen met de oorspronkelijke versies!"
 }
