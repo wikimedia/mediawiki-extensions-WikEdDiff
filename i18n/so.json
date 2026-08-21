@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"AhmedG612"
+		]
+	},
+	"wiked-diff-desc": "Matoor isbarbardhig ah oo farqiga ah, oo taageera Wareejinta qaybaha",
+	"wiked-diff-empty": "(Wax isbedel ah ma jiro)",
+	"wiked-diff-same": "Farqi u dhexeeya noocyada ma jiro",
+	"wiked-diff-ins": "La geliyay",
+	"wiked-diff-del": "Tirtiray",
+	"wiked-diff-block-left": "◀ Wareejiyay",
+	"wiked-diff-block-right": "Wareejiyay ▶",
+	"wiked-diff-block-left-nounicode": "< Wareejiyay",
+	"wiked-diff-block-right-nounicode": "Wareejiyay >",
+	"wiked-diff-error": "Khalad: Natiijada wikEdDiff kuma waafaqsana noocyadii asalka ahaa!"
+}
