@@ -1,8 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Cacycle"
+			"Cacycle",
+			"Wizzard"
 		]
 	},
-	"wiked-diff-empty": "(Žiaden rozdiel)"
+	"wiked-diff-desc": "Nástroj na porovnávanie rozdielov v riadkovom štýle s podporou presunu blokov",
+	"wiked-diff-empty": "(Žiaden rozdiel)",
+	"wiked-diff-same": "Žiadny rozdiel medzi verziami",
+	"wiked-diff-ins": "Vložené",
+	"wiked-diff-del": "Zmazané",
+	"wiked-diff-block-left": "◀ Presunuté",
+	"wiked-diff-block-right": "Presunuté ▶",
+	"wiked-diff-block-left-nounicode": "< Presunuté",
+	"wiked-diff-block-right-nounicode": "Presunuté >",
+	"wiked-diff-error": "Chyba: výstup wikEdDiff nie je konzistentný s pôvodnými verziami!"
 }
