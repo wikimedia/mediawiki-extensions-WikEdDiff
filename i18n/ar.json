@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Cacycle",
+			"Mohammed Qays",
 			"ديفيد",
 			"محمد أحمد عبد الفتاح"
 		]
@@ -14,6 +15,6 @@
 	"wiked-diff-block-left": "◀ تم النقل",
 	"wiked-diff-block-right": "تم النقل ◀",
 	"wiked-diff-block-left-nounicode": "< تم النقل",
-	"wiked-diff-block-right-nounicode": "تم النقل >",
+	"wiked-diff-block-right-nounicode": "نُقل >",
 	"wiked-diff-error": "خطأ: إخراج فرق الويكي غير متوافق مع الإصدارات الأصلية!"
 }
