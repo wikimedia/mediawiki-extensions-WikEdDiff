@@ -3,7 +3,8 @@
 		"authors": [
 			"Cacycle",
 			"ديفيد",
-			"محمد أحمد عبد الفتاح"
+			"محمد أحمد عبد الفتاح",
+			"Mohammed Qays"
 		]
 	},
 	"wiked-diff-desc": "محرك الفرق على طريقة المضمن مع دعم كتلة النقل",
@@ -14,6 +15,6 @@
 	"wiked-diff-block-left": "◀ تم النقل",
 	"wiked-diff-block-right": "تم النقل ◀",
 	"wiked-diff-block-left-nounicode": "< تم النقل",
-	"wiked-diff-block-right-nounicode": "تم النقل >",
+	"wiked-diff-block-right-nounicode": "نُقل >",
 	"wiked-diff-error": "خطأ: إخراج فرق الويكي غير متوافق مع الإصدارات الأصلية!"
 }
